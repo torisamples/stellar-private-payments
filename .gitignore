@@ -50,4 +50,4 @@ scripts/testdata/*
 docs/book/
 
 # Ceremony
-ceremony/
+ceremony/!dist/
