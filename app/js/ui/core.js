@@ -93,6 +93,38 @@ export async function deriveKeysFromWallet({ onStatus, signOptions = {}, signDel
     return { privKeyBytes, pubKeyBytes, encryptionKeypair };
 }
 
+/**
+ * Converts an XLM amount (string or number) to integer stroops (1 XLM = 10,000,000 stroops).
+ * Uses string-based parsing to avoid floating-point precision errors.
+ * @param {string|number} xlm - Amount in XLM
+ * @returns {bigint} Amount in stroops
+ */
+export function xlmToStroops(xlm) {
+    const str = String(xlm).trim();
+    if (!str || str === 'NaN') return 0n;
+
+    const negative = str.startsWith('-');
+    const abs = negative ? str.slice(1) : str;
+
+    const [whole = '0', frac = ''] = abs.split('.');
+    // Pad or truncate fractional part to exactly 7 digits (stroops precision)
+    const fracPadded = (frac + '0000000').slice(0, 7);
+    const stroops = BigInt(whole) * 10_000_000n + BigInt(fracPadded);
+
+    return negative ? -stroops : stroops;
+}
+
+/**
+ * Formats a stroops amount as an XLM display string, trimming trailing zeros.
+ * @param {bigint|number} stroops - Amount in stroops
+ * @returns {string} Formatted XLM amount
+ */
+export function stroopsToXlmDisplay(stroops) {
+    const n = Number(stroops);
+    const xlm = n / 1e7;
+    return xlm.toFixed(7).replace(/\.?0+$/, '');
+}
+
 // Utilities
 export const Utils = {
     generateHex(length = 64) {

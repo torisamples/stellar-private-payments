@@ -20,7 +20,7 @@ import {
     poseidon2Hash2,
     bytesToBigIntLE,
 } from '../../bridge.js';
-import { App, Utils, Toast, Storage, deriveKeysFromWallet } from '../core.js';
+import { App, Utils, Toast, Storage, deriveKeysFromWallet, xlmToStroops, stroopsToXlmDisplay } from '../core.js';
 import { Templates } from '../templates.js';
 import { getTransactionErrorMessage } from '../errors.js';
 
@@ -81,21 +81,24 @@ export const Deposit = {
     },
     
     updateBalance() {
-        const depositVal = parseFloat(document.getElementById('deposit-amount').value) || 0;
-        
-        let outputsTotal = 0;
+        const depositStroops = xlmToStroops(document.getElementById('deposit-amount').value);
+
+        let outputsStroops = 0n;
         document.querySelectorAll('#deposit-outputs .output-amount').forEach(input => {
-            outputsTotal += parseFloat(input.value) || 0;
+            outputsStroops += xlmToStroops(input.value);
         });
-        
+
+        const depositDisplay = stroopsToXlmDisplay(depositStroops);
+        const outputsDisplay = stroopsToXlmDisplay(outputsStroops);
+
         const eq = document.getElementById('deposit-balance');
-        eq.querySelector('[data-eq="input"]').textContent = `Deposit: ${depositVal}`;
-        eq.querySelector('[data-eq="outputs"]').textContent = `Outputs: ${outputsTotal}`;
-        
-        const isBalanced = Math.abs(depositVal - outputsTotal) < 0.0000001 && depositVal > 0;
+        eq.querySelector('[data-eq="input"]').textContent = `Deposit: ${depositDisplay}`;
+        eq.querySelector('[data-eq="outputs"]').textContent = `Outputs: ${outputsDisplay}`;
+
+        const isBalanced = depositStroops === outputsStroops && depositStroops > 0n;
         const status = eq.querySelector('[data-eq="status"]');
         
-        if (depositVal > 0 || outputsTotal > 0) {
+        if (depositStroops > 0n || outputsStroops > 0n) {
             if (isBalanced) {
                 status.innerHTML = '<svg class="w-5 h-5 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
                 eq.classList.remove('border-red-500/50', 'bg-red-500/5');
@@ -124,7 +127,8 @@ export const Deposit = {
             return;
         }
         
-        const totalAmount = parseFloat(document.getElementById('deposit-amount').value);
+        const totalAmountStroops = xlmToStroops(document.getElementById('deposit-amount').value);
+        const totalAmount = Number(totalAmountStroops) / 1e7;
         const btn = document.getElementById('btn-deposit');
         const btnText = btn.querySelector('.btn-text');
         const btnLoading = btn.querySelector('.btn-loading');
@@ -194,8 +198,7 @@ export const Deposit = {
             // Step 3: Build output notes
             const outputs = [];
             document.querySelectorAll('#deposit-outputs .output-row').forEach(row => {
-                const amount = parseFloat(row.querySelector('.output-amount').value) || 0;
-                const amountBigInt = BigInt(Math.floor(amount * 1e7));
+                const amountBigInt = xlmToStroops(row.querySelector('.output-amount').value);
                 const blindingBytes = generateBlinding();
                 const blinding = bytesToBigIntLE(blindingBytes);
                 outputs.push({ amount: amountBigInt, blinding });
@@ -210,7 +213,6 @@ export const Deposit = {
             
             // Step 4: Generate proof
             const contracts = getDeployedContracts();
-            const totalAmountStroops = BigInt(Math.floor(totalAmount * 10_000_000));
             
             setLoadingText('Generating ZK proof...');
             const proofResult = await generateDepositProof({
