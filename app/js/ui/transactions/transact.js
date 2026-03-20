@@ -8,7 +8,7 @@ import { readAllContractStates, getDeployedContracts, submitPoolTransaction } fr
 import { StateManager, poolStore, notesStore } from '../../state/index.js';
 import { hexToBytes } from '../../state/utils.js';
 import { generateBlinding, fieldToHex, bytesToBigIntLE, bigintToField, hexToField } from '../../bridge.js';
-import { App, Utils, Toast, Storage, deriveKeysFromWallet } from '../core.js';
+import { App, Utils, Toast, Storage, deriveKeysFromWallet, xlmToStroops, stroopsToXlmDisplay } from '../core.js';
 import { Templates } from '../templates.js';
 import { onWalletConnect } from '../navigation.js';
 import { getTransactionErrorMessage } from '../errors.js';
@@ -106,35 +106,35 @@ export const Transact = {
     },
     
     updateBalance() {
-        let inputsTotalStroops = 0;
+        let inputsTotalStroops = 0n;
         document.querySelectorAll('#transact-inputs .note-input').forEach(input => {
             const noteId = input.value.trim();
             const normalizedId = noteId.toLowerCase();
             const note = App.state.notes.find(n => (n.id === normalizedId || n.id === noteId) && !n.spent);
             if (note) {
-                inputsTotalStroops += Number(note.amount);
+                inputsTotalStroops += BigInt(note.amount);
             } else if (input.dataset.uploadedAmount) {
                 // Use amount from uploaded file if note not in local state
-                inputsTotalStroops += Number(input.dataset.uploadedAmount);
+                inputsTotalStroops += BigInt(input.dataset.uploadedAmount);
             }
         });
-        const inputsTotal = inputsTotalStroops / 1e7;
-        
-        const publicAmount = parseFloat(document.getElementById('transact-amount').value) || 0;
-        
-        let outputsTotal = 0;
+
+        const publicAmountStroops = xlmToStroops(document.getElementById('transact-amount').value);
+        const publicAmountDisplay = stroopsToXlmDisplay(publicAmountStroops);
+
+        let outputsTotalStroops = 0n;
         document.querySelectorAll('#transact-outputs .output-amount').forEach(input => {
-            outputsTotal += parseFloat(input.value) || 0;
+            outputsTotalStroops += xlmToStroops(input.value);
         });
-        
+
         const eq = document.getElementById('transact-balance');
-        eq.querySelector('[data-eq="inputs"]').textContent = `Inputs: ${inputsTotal.toFixed(7).replace(/\.?0+$/, '')}`;
-        eq.querySelector('[data-eq="public"]').textContent = `Public: ${publicAmount >= 0 ? '+' : ''}${publicAmount}`;
-        eq.querySelector('[data-eq="outputs"]').textContent = `Outputs: ${outputsTotal}`;
-        
-        const leftSide = inputsTotal + publicAmount;
-        const isBalanced = Math.abs(leftSide - outputsTotal) < 0.0000001;
-        const hasValues = inputsTotal > 0 || publicAmount !== 0 || outputsTotal > 0;
+        eq.querySelector('[data-eq="inputs"]').textContent = `Inputs: ${stroopsToXlmDisplay(inputsTotalStroops)}`;
+        eq.querySelector('[data-eq="public"]').textContent = `Public: ${publicAmountStroops >= 0n ? '+' : ''}${publicAmountDisplay}`;
+        eq.querySelector('[data-eq="outputs"]').textContent = `Outputs: ${stroopsToXlmDisplay(outputsTotalStroops)}`;
+
+        const leftSide = inputsTotalStroops + publicAmountStroops;
+        const isBalanced = leftSide === outputsTotalStroops;
+        const hasValues = inputsTotalStroops > 0n || publicAmountStroops !== 0n || outputsTotalStroops > 0n;
         
         const validIcon = eq.querySelector('[data-icon="valid"]');
         const invalidIcon = eq.querySelector('[data-icon="invalid"]');
@@ -178,8 +178,7 @@ export const Transact = {
                 signDelay: 500,
             });
             
-            const publicAmount = parseFloat(document.getElementById('transact-amount').value) || 0;
-            const publicAmountStroops = BigInt(Math.round(publicAmount * 1e7));
+            const publicAmountStroops = xlmToStroops(document.getElementById('transact-amount').value);
             
             // Get per-output recipient configuration
             const outputRecipients = this.getOutputRecipients();
@@ -238,14 +237,14 @@ export const Transact = {
             const outputs = [];
             for (let idx = 0; idx < outputRecipients.length; idx++) {
                 const row = document.querySelectorAll('#transact-outputs .advanced-output-row')[idx];
-                const amount = parseFloat(row.querySelector('.output-amount').value) || 0;
+                const amountStroops = xlmToStroops(row.querySelector('.output-amount').value);
                 const blindingBytes = generateBlinding();
                 const blinding = bytesToBigIntLE(blindingBytes);
                 const recipient = outputRecipients[idx];
-                
+
                 let recipientNoteKeyBytes = null;
                 let recipientEncKeyBytes = null;
-                
+
                 if (!recipient.isSelf) {
                     // Parse BN254 note key (use hexToField for LE bytes)
                     try {
@@ -256,7 +255,7 @@ export const Transact = {
                     } catch {
                         throw new Error(`Output ${idx + 1}: Invalid note key format. Expected 64 hex characters.`);
                     }
-                    
+
                     // Parse X25519 encryption key (raw bytes, use hexToBytes)
                     try {
                         recipientEncKeyBytes = hexToBytes(recipient.encryptionKey);
@@ -267,9 +266,9 @@ export const Transact = {
                         throw new Error(`Output ${idx + 1}: Invalid encryption key format. Expected 64 hex characters.`);
                     }
                 }
-                
-                outputs.push({ 
-                    amount: BigInt(Math.round(amount * 1e7)), 
+
+                outputs.push({
+                    amount: amountStroops,
                     blinding,
                     isSelf: recipient?.isSelf ?? true,
                     recipientNoteKey: recipientNoteKeyBytes,

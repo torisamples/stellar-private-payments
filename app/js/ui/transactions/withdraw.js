@@ -7,7 +7,7 @@ import { signWalletTransaction, signWalletAuthEntry } from '../../wallet.js';
 import { readAllContractStates, submitPoolTransaction } from '../../stellar.js';
 import { StateManager, poolStore, notesStore } from '../../state/index.js';
 import { generateWithdrawProof } from '../../transaction-builder.js';
-import { App, Toast, Storage, deriveKeysFromWallet } from '../core.js';
+import { App, Toast, Storage, deriveKeysFromWallet, stroopsToXlmDisplay } from '../core.js';
 import { Templates } from '../templates.js';
 import { onWalletConnect } from '../navigation.js';
 import { getTransactionErrorMessage } from '../errors.js';
@@ -80,8 +80,7 @@ export const Withdraw = {
                 totalStroops += BigInt(input.dataset.uploadedAmount);
             }
         });
-        const totalXLM = Number(totalStroops) / 1e7;
-        document.getElementById('withdraw-total').textContent = `${totalXLM.toFixed(7).replace(/\.?0+$/, '')} XLM`;
+        document.getElementById('withdraw-total').textContent = `${stroopsToXlmDisplay(totalStroops)} XLM`;
         return totalStroops;
     },
     

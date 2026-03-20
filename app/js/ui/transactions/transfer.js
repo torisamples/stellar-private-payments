@@ -9,7 +9,7 @@ import { StateManager, poolStore, notesStore } from '../../state/index.js';
 import { hexToBytes } from '../../state/utils.js';
 import { generateTransferProof } from '../../transaction-builder.js';
 import { generateBlinding, fieldToHex, bytesToBigIntLE, hexToField } from '../../bridge.js';
-import { App, Utils, Toast, Storage, deriveKeysFromWallet } from '../core.js';
+import { App, Utils, Toast, Storage, deriveKeysFromWallet, xlmToStroops, stroopsToXlmDisplay } from '../core.js';
 import { Templates } from '../templates.js';
 import { AddressBook } from '../address-book.js';
 import { getTransactionErrorMessage } from '../errors.js';
@@ -93,30 +93,29 @@ export const Transfer = {
     },
     
     updateBalance() {
-        let inputsTotalStroops = 0;
+        let inputsTotalStroops = 0n;
         document.querySelectorAll('#transfer-inputs .note-input').forEach(input => {
             const noteId = input.value.trim().toLowerCase();
             const note = App.state.notes.find(n => n.id === noteId && !n.spent);
             if (note) {
-                inputsTotalStroops += Number(note.amount);
+                inputsTotalStroops += BigInt(note.amount);
             } else if (input.dataset.uploadedAmount) {
                 // Use amount from uploaded file if note not in local state
-                inputsTotalStroops += Number(input.dataset.uploadedAmount);
+                inputsTotalStroops += BigInt(input.dataset.uploadedAmount);
             }
         });
-        const inputsTotal = inputsTotalStroops / 1e7;
-        
-        let outputsTotal = 0;
+
+        let outputsTotalStroops = 0n;
         document.querySelectorAll('#transfer-outputs .output-amount').forEach(input => {
-            outputsTotal += parseFloat(input.value) || 0;
+            outputsTotalStroops += xlmToStroops(input.value);
         });
-        
+
         const eq = document.getElementById('transfer-balance');
-        eq.querySelector('[data-eq="inputs"]').textContent = `Inputs: ${inputsTotal.toFixed(7).replace(/\.?0+$/, '')}`;
-        eq.querySelector('[data-eq="outputs"]').textContent = `Outputs: ${outputsTotal}`;
-        
-        const isBalanced = Math.abs(inputsTotal - outputsTotal) < 0.0000001;
-        const hasValues = inputsTotal > 0 || outputsTotal > 0;
+        eq.querySelector('[data-eq="inputs"]').textContent = `Inputs: ${stroopsToXlmDisplay(inputsTotalStroops)}`;
+        eq.querySelector('[data-eq="outputs"]').textContent = `Outputs: ${stroopsToXlmDisplay(outputsTotalStroops)}`;
+
+        const isBalanced = inputsTotalStroops === outputsTotalStroops;
+        const hasValues = inputsTotalStroops > 0n || outputsTotalStroops > 0n;
         
         const validIcon = eq.querySelector('[data-icon="valid"]');
         const invalidIcon = eq.querySelector('[data-icon="invalid"]');
@@ -252,11 +251,11 @@ export const Transfer = {
             
             const recipientOutputs = [];
             document.querySelectorAll('#transfer-outputs .output-row').forEach(row => {
-                const amount = parseFloat(row.querySelector('.output-amount').value) || 0;
-                if (amount > 0) {
+                const amountStroops = xlmToStroops(row.querySelector('.output-amount').value);
+                if (amountStroops > 0n) {
                     const blindingBytes = generateBlinding();
                     const blinding = bytesToBigIntLE(blindingBytes);
-                    recipientOutputs.push({ amount: BigInt(Math.round(amount * 1e7)), blinding });
+                    recipientOutputs.push({ amount: amountStroops, blinding });
                 }
             });
             
