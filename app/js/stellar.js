@@ -1,5 +1,5 @@
 /**
- * Stellar Network Integration for PoolStellar
+ * Stellar Network Integration
  * Specialized for Pool, ASP Membership, and ASP Non-Membership contracts
  * @see https://developers.stellar.org/docs/build/guides/dapps/frontend-guide
  */

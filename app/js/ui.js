@@ -1,7 +1,7 @@
 /**
- * PoolStellar Private Payment System
+ * Stellar Private Payments
  * Main UI entry point - imports and initializes all UI modules.
- * 
+ *
  * @module ui
  */
 
@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.warn('[Init] Background prover init failed (will retry on demand):', err.message);
     });
     
-    console.log('PoolStellar initialized');
+    console.log('Stellar Private Payments initialized');
 });
 
 // Re-exports

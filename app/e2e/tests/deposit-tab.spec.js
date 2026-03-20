@@ -25,7 +25,7 @@ async function connectWallet(page) {
 
 /**
  * Helper: navigate to the app and wait for full JS initialization.
- * The app logs "PoolStellar initialized" when DOMContentLoaded completes.
+ * The app logs "Stellar Private Payments initialized" when DOMContentLoaded completes.
  * We also need to handle the case where WASM init fails and the message
  * never appears — fall back to waiting for the tab handlers to be attached.
  */
