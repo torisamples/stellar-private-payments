@@ -1,5 +1,5 @@
 /**
- * IndexedDB wrapper for PoolStellar state management.
+ * IndexedDB wrapper for state management.
  * Uses native IndexedDB API with promise wrappers.
  * @module state/db
  */
