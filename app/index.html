@@ -28,7 +28,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
     <link data-trunk rel="rust" href="crates/prover" data-target-path="js" data-wasm-opt="0" />
     <link data-trunk rel="copy-dir" href="assets/" />
@@ -39,25 +39,98 @@
         Skip to main content
     </a>
 
+    <!-- Onboarding Overlay -->
+    <div id="onboarding-overlay" class="fixed inset-0 z-[200] bg-dark-950/95 backdrop-blur-xl flex items-center justify-center p-4">
+      <div class="max-w-lg w-full animate-fade-in">
+        <div class="text-center mb-8">
+          <div class="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-xl shadow-brand-500/20">
+            <svg class="w-8 h-8 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/>
+              <circle cx="12" cy="10" r="3"/>
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold tracking-tight mb-2">Stellar Private Payments</h2>
+          <p class="text-dark-400 text-sm leading-relaxed max-w-md mx-auto">
+            Send and receive payments privately on the Stellar network using zero-knowledge proofs.
+            This sandbox runs on <strong class="text-dark-300">testnet</strong> — no real funds involved.
+          </p>
+        </div>
+
+        <div class="space-y-3 mb-8">
+          <div class="flex items-start gap-4 p-4 rounded-xl bg-dark-900/80 border border-dark-800">
+            <div class="w-8 h-8 shrink-0 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-400 font-semibold text-sm">1</div>
+            <div>
+              <p class="font-medium text-sm text-dark-100">Install Freighter Wallet</p>
+              <p class="text-xs text-dark-400 mt-0.5">A browser extension for Stellar. <a href="https://www.freighter.app/" target="_blank" class="text-brand-400 hover:text-brand-300 underline underline-offset-2">Get it here</a></p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4 p-4 rounded-xl bg-dark-900/80 border border-dark-800">
+            <div class="w-8 h-8 shrink-0 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-400 font-semibold text-sm">2</div>
+            <div>
+              <p class="font-medium text-sm text-dark-100">Connect & Fund Your Wallet</p>
+              <p class="text-xs text-dark-400 mt-0.5">Connect Freighter, then get free testnet XLM with one click.</p>
+            </div>
+          </div>
+          <div class="flex items-start gap-4 p-4 rounded-xl bg-dark-900/80 border border-dark-800">
+            <div class="w-8 h-8 shrink-0 rounded-lg bg-brand-500/10 flex items-center justify-center text-brand-400 font-semibold text-sm">3</div>
+            <div>
+              <p class="font-medium text-sm text-dark-100">Make a Private Payment</p>
+              <p class="text-xs text-dark-400 mt-0.5">Deposit, transfer, or withdraw — all privacy-preserving.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-3">
+          <button
+            id="onboarding-start-btn"
+            class="w-full py-3 px-6 bg-gradient-to-r from-brand-500 to-brand-600 hover:from-brand-400 hover:to-brand-500 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-brand-500/20 hover:shadow-brand-500/30 btn-press"
+            onclick="document.getElementById('onboarding-overlay').classList.add('hidden'); localStorage.setItem('onboarding-seen', '1');"
+          >
+            Get Started
+          </button>
+          <button
+            class="w-full py-2 px-6 text-dark-400 hover:text-dark-200 text-sm font-medium transition-colors"
+            onclick="document.getElementById('onboarding-overlay').classList.add('hidden'); localStorage.setItem('onboarding-seen', '1');"
+          >
+            I've used this before — skip
+          </button>
+        </div>
+      </div>
+    </div>
+    <script>
+      if (localStorage.getItem('onboarding-seen')) {
+        document.getElementById('onboarding-overlay').classList.add('hidden');
+      }
+    </script>
+
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 flex flex-col gap-4 sm:gap-6 min-h-screen">
-        
+
         <!-- Header -->
         <header class="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-dark-900/80 backdrop-blur-sm border border-dark-800 rounded-xl overflow-visible relative z-50" role="banner">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 flex items-center justify-center bg-gradient-to-br from-brand-500 to-brand-600 rounded-lg shadow-lg shadow-brand-500/25" aria-hidden="true">
-                    <svg class="w-6 h-6 text-dark-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M12 6v12M8 10l4-4 4 4"/>
-                        <circle cx="12" cy="15" r="2" fill="currentColor"/>
+                <div class="w-9 h-9 flex items-center justify-center" aria-hidden="true">
+                    <svg class="w-9 h-9" viewBox="0 0 36 36" fill="none">
+                        <circle cx="18" cy="18" r="18" fill="url(#stellar-grad)"/>
+                        <path d="M25.2 13.8l-1.8.9c-.3-1.5-1.2-2.7-2.7-3.3l.9-1.8c2.1.9 3.3 2.4 3.6 4.2zm-3.6 8.4l1.8-.9c.3 1.5-1.5 3.3-3.6 4.2l-.9-1.8c1.5-.6 2.4-1.8 2.7-1.5zM18 10.8c-4 0-7.2 3.2-7.2 7.2s3.2 7.2 7.2 7.2 7.2-3.2 7.2-7.2-3.2-7.2-7.2-7.2zm0 12c-2.7 0-4.8-2.1-4.8-4.8s2.1-4.8 4.8-4.8 4.8 2.1 4.8 4.8-2.1 4.8-4.8 4.8z" fill="white"/>
+                        <defs><linearGradient id="stellar-grad" x1="0" y1="0" x2="36" y2="36"><stop stop-color="#5c7cfa"/><stop offset="1" stop-color="#4263eb"/></linearGradient></defs>
                     </svg>
                 </div>
-                <h1 class="text-lg sm:text-xl font-semibold">
+                <h1 class="text-lg sm:text-xl font-semibold tracking-tight">
                     Stellar <span class="text-dark-400 font-normal">Private Payments</span>
                 </h1>
+                <span class="hidden sm:inline-flex items-center px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-brand-500/10 text-brand-400 border border-brand-500/20 rounded-full">Sandbox</span>
             </div>
             <div class="flex items-center gap-3 overflow-visible">
-                <div class="flex items-center gap-2 px-3 py-1.5 bg-dark-800 border border-dark-700 rounded-full text-sm text-dark-300">
-                    <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse-dot shadow-sm shadow-emerald-500" aria-hidden="true"></span>
+                <button
+                    id="fund-testnet-btn"
+                    class="hidden items-center gap-2 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-lg text-sm text-emerald-400 font-medium transition-all btn-press"
+                    title="Get free testnet XLM from Friendbot"
+                >
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    Fund Wallet
+                </button>
+                <div class="flex items-center gap-2 px-3 py-1.5 bg-dark-800 border border-dark-700 rounded-full text-xs text-dark-400">
+                    <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse-dot" aria-hidden="true"></span>
                     <span id="network-name">Network</span>
                 </div>
                 <div class="relative overflow-visible" id="wallet-container">
@@ -1226,5 +1299,62 @@
 
 
     <script data-trunk data-target-path="js" data-integrity="none" src="js/ui.js" type="module"></script>
+
+    <!-- Friendbot funding integration -->
+    <script>
+    (function() {
+      const fundBtn = document.getElementById('fund-testnet-btn');
+      if (!fundBtn) return;
+
+      // Show fund button when wallet connects
+      const observer = new MutationObserver(() => {
+        const walletText = document.getElementById('wallet-text');
+        if (walletText && walletText.textContent !== 'Connect Freighter' && walletText.textContent !== 'Install Freighter') {
+          fundBtn.classList.remove('hidden');
+          fundBtn.classList.add('flex');
+        } else {
+          fundBtn.classList.add('hidden');
+          fundBtn.classList.remove('flex');
+        }
+      });
+      const walletText = document.getElementById('wallet-text');
+      if (walletText) observer.observe(walletText, { childList: true, characterData: true, subtree: true });
+
+      fundBtn.addEventListener('click', async () => {
+        const addr = document.getElementById('wallet-dropdown-address')?.textContent?.trim();
+        if (!addr) { alert('Connect your wallet first.'); return; }
+
+        fundBtn.disabled = true;
+        fundBtn.innerHTML = '<svg class="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 0 1 10 10"/></svg> Funding...';
+
+        try {
+          const res = await fetch('https://friendbot.stellar.org?addr=' + encodeURIComponent(addr));
+          if (res.ok) {
+            fundBtn.innerHTML = '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg> Funded!';
+            fundBtn.classList.remove('text-emerald-400', 'border-emerald-500/30', 'bg-emerald-500/10');
+            fundBtn.classList.add('text-emerald-300', 'border-emerald-400/40', 'bg-emerald-500/20');
+            setTimeout(() => {
+              fundBtn.innerHTML = '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Fund Wallet';
+              fundBtn.disabled = false;
+              fundBtn.classList.add('text-emerald-400', 'border-emerald-500/30', 'bg-emerald-500/10');
+              fundBtn.classList.remove('text-emerald-300', 'border-emerald-400/40', 'bg-emerald-500/20');
+            }, 3000);
+          } else {
+            fundBtn.textContent = 'Already funded';
+            setTimeout(() => {
+              fundBtn.innerHTML = '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Fund Wallet';
+              fundBtn.disabled = false;
+            }, 2000);
+          }
+        } catch (e) {
+          fundBtn.textContent = 'Error';
+          fundBtn.disabled = false;
+          setTimeout(() => {
+            fundBtn.innerHTML = '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> Fund Wallet';
+          }, 2000);
+        }
+      });
+    })();
+    </script>
 </body>
 </html>
