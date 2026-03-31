@@ -16,23 +16,31 @@ port = 8000
 [tools]
 tailwindcss = "4.1.18"
 
-# Copy all static assets to staging
+# Copy all static assets to staging.
+# In CI, set CIRCUIT_ARTIFACT_DIR to a folder with pre-downloaded artifacts.
+# Locally, artifacts come from the Cargo build output and scripts/testdata/.
 [[hooks]]
 stage = "pre_build"
 command = "sh"
 command_arguments = ["-c", """
 mkdir -p $TRUNK_STAGING_DIR/circuits $TRUNK_STAGING_DIR/keys $TRUNK_STAGING_DIR/js/witness
 
-# Circuit artifacts from Cargo build output
-CIRCUIT_OUT=$(find target -path '*/build/circuits-*/out/circuits' -type d 2>/dev/null | head -1)
-if [ -n "$CIRCUIT_OUT" ]; then
-    cp "$CIRCUIT_OUT"/*.r1cs $TRUNK_STAGING_DIR/circuits/ 2>/dev/null || true
-    cp "$CIRCUIT_OUT"/wasm/*_js/*.wasm $TRUNK_STAGING_DIR/circuits/ 2>/dev/null || true
+# Circuit artifacts: prefer CI artifact dir, fall back to Cargo build output
+if [ -n "$CIRCUIT_ARTIFACT_DIR" ] && [ -d "$CIRCUIT_ARTIFACT_DIR" ]; then
+    echo "[Trunk hook] Using circuit artifacts from $CIRCUIT_ARTIFACT_DIR"
+    cp "$CIRCUIT_ARTIFACT_DIR"/*.r1cs  $TRUNK_STAGING_DIR/circuits/ 2>/dev/null || true
+    cp "$CIRCUIT_ARTIFACT_DIR"/*.wasm  $TRUNK_STAGING_DIR/circuits/ 2>/dev/null || true
+    cp "$CIRCUIT_ARTIFACT_DIR"/*_proving_key.bin $TRUNK_STAGING_DIR/keys/ 2>/dev/null || true
+    cp "$CIRCUIT_ARTIFACT_DIR"/*_vk.json $TRUNK_STAGING_DIR/keys/ 2>/dev/null || true
+else
+    CIRCUIT_OUT=$(find target -path '*/build/circuits-*/out/circuits' -type d 2>/dev/null | head -1)
+    if [ -n "$CIRCUIT_OUT" ]; then
+        cp "$CIRCUIT_OUT"/*.r1cs $TRUNK_STAGING_DIR/circuits/ 2>/dev/null || true
+        cp "$CIRCUIT_OUT"/wasm/*_js/*.wasm $TRUNK_STAGING_DIR/circuits/ 2>/dev/null || true
+    fi
+    cp scripts/testdata/*_proving_key.bin $TRUNK_STAGING_DIR/keys/ 2>/dev/null || true
+    cp scripts/testdata/*_vk.json $TRUNK_STAGING_DIR/keys/ 2>/dev/null || true
 fi
-
-# Proving keys
-cp scripts/testdata/*_proving_key.bin $TRUNK_STAGING_DIR/keys/ 2>/dev/null || true
-cp scripts/testdata/*_vk.json $TRUNK_STAGING_DIR/keys/ 2>/dev/null || true
 
 # Witness WASM module
 cp target/wasm-witness/witness.js $TRUNK_STAGING_DIR/js/witness/ 2>/dev/null || true
