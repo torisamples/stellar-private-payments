@@ -161,6 +161,11 @@
    Tailwind utility classes in light mode.
    ============================================ */
 
+/* In public mode, main content is single-column (sidebar hidden) */
+[data-mode="public"] #main-content {
+  display: block;
+}
+
 /* Dev-only classes are hidden in public mode */
 [data-mode="public"] .dev-only {
   display: none;

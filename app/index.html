@@ -123,7 +123,7 @@
             <div class="flex items-center gap-3 overflow-visible">
                 <button
                     id="guide-btn"
-                    class="public-only flex items-center gap-2 px-3 py-1.5 bg-dark-800 hover:bg-dark-700 border border-dark-700 rounded-lg text-sm text-dark-300 hover:text-brand-400 font-medium transition-all btn-press"
+                    class="public-only hidden flex items-center gap-2 px-3 py-1.5 bg-dark-800 hover:bg-dark-700 border border-dark-700 rounded-lg text-sm text-dark-300 hover:text-brand-400 font-medium transition-all btn-press"
                     title="Toggle user guide"
                     aria-label="Show guide"
                 >
@@ -1535,15 +1535,8 @@
       }
 
       function initializeGuideVisibility() {
-        const guide = document.getElementById('user-guide');
-        if (!guide) return;
-
         const guideHidden = localStorage.getItem('guide-hidden') === '1';
-        if (guideHidden) {
-          guide.classList.add('hidden');
-        } else {
-          guide.classList.remove('hidden');
-        }
+        updateGuideVisibility(!guideHidden);
       }
 
       // Mode toggle button
@@ -1556,30 +1549,31 @@
         });
       }
 
-      // Guide toggle button
-      const guideBtn = document.getElementById('guide-btn');
-      if (guideBtn) {
-        guideBtn.addEventListener('click', () => {
-          const guide = document.getElementById('user-guide');
-          const isHidden = guide.classList.contains('hidden');
-          if (isHidden) {
-            guide.classList.remove('hidden');
-            localStorage.setItem('guide-hidden', '0');
-          } else {
-            guide.classList.add('hidden');
-            localStorage.setItem('guide-hidden', '1');
-          }
-        });
+      function updateGuideVisibility(showGuide) {
+        const guide = document.getElementById('user-guide');
+        const guideBtn = document.getElementById('guide-btn');
+        if (!guide) return;
+        if (showGuide) {
+          guide.classList.remove('hidden');
+          if (guideBtn) guideBtn.classList.add('hidden');
+          localStorage.setItem('guide-hidden', '0');
+        } else {
+          guide.classList.add('hidden');
+          if (guideBtn) guideBtn.classList.remove('hidden');
+          localStorage.setItem('guide-hidden', '1');
+        }
       }
 
-      // Hide guide button
+      // Guide toggle button (in header — shows guide when it's hidden)
+      const guideBtn = document.getElementById('guide-btn');
+      if (guideBtn) {
+        guideBtn.addEventListener('click', () => updateGuideVisibility(true));
+      }
+
+      // Hide guide button (inside guide panel)
       const hideGuideBtn = document.getElementById('hide-guide-btn');
       if (hideGuideBtn) {
-        hideGuideBtn.addEventListener('click', () => {
-          const guide = document.getElementById('user-guide');
-          guide.classList.add('hidden');
-          localStorage.setItem('guide-hidden', '1');
-        });
+        hideGuideBtn.addEventListener('click', () => updateGuideVisibility(false));
       }
 
       // Initialize on page load
