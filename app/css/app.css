@@ -272,12 +272,12 @@
 
 /* Dev-only classes are hidden in public mode */
 [data-mode="public"] .dev-only {
-  @apply hidden !important;
+  display: none;
 }
 
 /* Public-only classes are hidden in dev mode */
 [data-mode="dev"] .public-only {
-  @apply hidden !important;
+  display: none;
 }
 
 /* Placeholder text in light mode */
