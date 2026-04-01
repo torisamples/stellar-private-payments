@@ -155,120 +155,11 @@
   }
 }
 
-/* Public Mode Light Theme */
-[data-mode="public"] {
-  --color-border: var(--color-dark-200);
-}
-
-[data-mode="public"] body {
-  @apply bg-white text-dark-950;
-}
-
-[data-mode="public"] h1, [data-mode="public"] h2, [data-mode="public"] h3 {
-  @apply text-dark-950;
-}
-
-[data-mode="public"] body,
-[data-mode="public"] .bg-dark-950,
-[data-mode="public"] .bg-dark-900,
-[data-mode="public"] .bg-dark-900/80 {
-  @apply bg-white;
-}
-
-[data-mode="public"] .bg-dark-800 {
-  @apply bg-dark-100;
-}
-
-[data-mode="public"] .bg-dark-700 {
-  @apply bg-dark-100;
-}
-
-[data-mode="public"] .bg-dark-600 {
-  @apply bg-dark-100;
-}
-
-[data-mode="public"] .text-dark-50 {
-  @apply text-dark-950;
-}
-
-[data-mode="public"] .text-dark-100 {
-  @apply text-dark-800;
-}
-
-[data-mode="public"] .text-dark-200 {
-  @apply text-dark-700;
-}
-
-[data-mode="public"] .text-dark-300 {
-  @apply text-dark-700;
-}
-
-[data-mode="public"] .text-dark-400 {
-  @apply text-dark-600;
-}
-
-[data-mode="public"] .text-dark-500 {
-  @apply text-dark-500;
-}
-
-[data-mode="public"] .text-dark-600,
-[data-mode="public"] .text-dark-700,
-[data-mode="public"] .text-dark-800 {
-  @apply text-dark-950;
-}
-
-[data-mode="public"] .border-dark-800 {
-  @apply border-dark-200;
-}
-
-[data-mode="public"] .border-dark-700 {
-  @apply border-dark-200;
-}
-
-[data-mode="public"] .border-dark-600 {
-  @apply border-dark-200;
-}
-
-[data-mode="public"] .bg-dark-900/80,
-[data-mode="public"] .bg-dark-800,
-[data-mode="public"] header {
-  @apply bg-dark-50 border-dark-200;
-}
-
-[data-mode="public"] .bg-dark-800.hover:bg-dark-700,
-[data-mode="public"] button[class*="bg-dark-800"] {
-  @apply bg-dark-100 hover:bg-dark-200 border-dark-200;
-}
-
-[data-mode="public"] input[type="number"],
-[data-mode="public"] input[type="text"],
-[data-mode="public"] textarea,
-[data-mode="public"] select {
-  @apply bg-white text-dark-950 border-dark-200;
-}
-
-[data-mode="public"] input[type="number"]:focus,
-[data-mode="public"] input[type="text"]:focus,
-[data-mode="public"] textarea:focus,
-[data-mode="public"] select:focus {
-  @apply border-brand-500;
-}
-
-[data-mode="public"] .tab-btn {
-  @apply text-dark-500 hover:text-dark-700 hover:bg-dark-100;
-}
-
-[data-mode="public"] .tab-btn[aria-selected="true"],
-[data-mode="public"] #tab-deposit[aria-selected="true"],
-[data-mode="public"] #tab-withdraw[aria-selected="true"],
-[data-mode="public"] #tab-transfer[aria-selected="true"],
-[data-mode="public"] #tab-transact[aria-selected="true"] {
-  @apply text-dark-950 bg-white border-dark-200 shadow-md shadow-brand-500/10;
-}
-
-[data-mode="public"] .hidden-in-public {
-  @apply hidden;
-}
+/* ============================================
+   Public Mode Light Theme
+   Uses direct CSS properties to reliably override
+   Tailwind utility classes in light mode.
+   ============================================ */
 
 /* Dev-only classes are hidden in public mode */
 [data-mode="public"] .dev-only {
@@ -280,7 +171,248 @@
   display: none;
 }
 
-/* Placeholder text in light mode */
+/* Base: override body and root backgrounds */
+[data-mode="public"] body {
+  background-color: #f8f9fa;
+  color: #1a1a2e;
+}
+
+/* Header bar */
+[data-mode="public"] header {
+  background-color: #ffffff;
+  border-color: #e5e5e5;
+}
+
+[data-mode="public"] header h1 {
+  color: #1a1a2e;
+}
+
+[data-mode="public"] header h1 span {
+  color: #6b7280;
+}
+
+/* Header buttons */
+[data-mode="public"] header button {
+  background-color: #f5f5f5;
+  border-color: #e5e5e5;
+  color: #4b5563;
+}
+
+[data-mode="public"] header button:hover {
+  background-color: #e5e5e5;
+  color: #5c7cfa;
+}
+
+/* Keep wallet button distinct */
+[data-mode="public"] #wallet-btn {
+  background-color: #5c7cfa;
+  border-color: #4263eb;
+  color: #ffffff;
+}
+
+[data-mode="public"] #wallet-btn:hover {
+  background-color: #4263eb;
+}
+
+/* Network indicator pill */
+[data-mode="public"] header .rounded-full {
+  background-color: #f0f4ff;
+  border-color: #dbe4ff;
+  color: #5c7cfa;
+}
+
+/* Transaction panel section */
+[data-mode="public"] section[aria-labelledby="transaction-heading"] {
+  background-color: #ffffff;
+  border-color: #e5e5e5;
+}
+
+/* Tab navigation bar */
+[data-mode="public"] nav[role="tablist"] {
+  background-color: #f8f9fa;
+  border-color: #e5e5e5;
+}
+
+/* Tab buttons - inactive */
+[data-mode="public"] .tab-btn {
+  color: #6b7280;
+  background-color: transparent;
+  border-color: transparent;
+}
+
+[data-mode="public"] .tab-btn:hover {
+  color: #1a1a2e;
+  background-color: #f0f0f0;
+}
+
+/* Tab buttons - active */
+[data-mode="public"] .tab-btn[aria-selected="true"] {
+  background-color: #ffffff;
+  color: #5c7cfa;
+  border-color: #dbe4ff;
+  box-shadow: 0 1px 3px rgba(92, 124, 250, 0.1);
+}
+
+/* Tab panel content area */
+[data-mode="public"] .tab-panel {
+  color: #374151;
+}
+
+/* Labels */
+[data-mode="public"] label {
+  color: #6b7280;
+}
+
+/* Input fields */
+[data-mode="public"] input[type="number"],
+[data-mode="public"] input[type="text"],
+[data-mode="public"] textarea,
+[data-mode="public"] select {
+  background-color: #ffffff;
+  color: #1a1a2e;
+  border-color: #e5e5e5;
+}
+
+[data-mode="public"] input[type="number"]:focus,
+[data-mode="public"] input[type="text"]:focus,
+[data-mode="public"] textarea:focus,
+[data-mode="public"] select:focus {
+  border-color: #5c7cfa;
+  box-shadow: 0 0 0 3px rgba(92, 124, 250, 0.15);
+}
+
 [data-mode="public"] input::placeholder {
-  @apply text-dark-400;
+  color: #9ca3af;
+}
+
+/* Range slider track */
+[data-mode="public"] input[type="range"] {
+  background-color: #e5e5e5;
+}
+
+/* Balance equation bar */
+[data-mode="public"] [id$="-balance"] {
+  background-color: #f0f4ff;
+  border-color: #dbe4ff;
+  color: #374151;
+}
+
+/* Output note rows */
+[data-mode="public"] .output-row,
+[data-mode="public"] .advanced-output-row {
+  background-color: #f8f9fa;
+  border-color: #e5e5e5;
+}
+
+/* Fieldsets and grouped sections */
+[data-mode="public"] fieldset {
+  border-color: #e5e5e5;
+  color: #374151;
+}
+
+[data-mode="public"] fieldset legend {
+  color: #6b7280;
+}
+
+/* Join Privacy Pool callout — white bg with brand left border */
+[data-mode="public"] #deposit-join-pool-btn {
+  background-color: #5c7cfa;
+  color: #ffffff;
+}
+
+/* Primary action buttons (Deposit, Withdraw, etc.) */
+[data-mode="public"] #btn-deposit,
+[data-mode="public"] #btn-withdraw,
+[data-mode="public"] #btn-transfer,
+[data-mode="public"] #btn-transact {
+  background: linear-gradient(135deg, #5c7cfa, #4263eb);
+  color: #ffffff;
+}
+
+/* Notes panel and address book */
+[data-mode="public"] #notes-panel,
+[data-mode="public"] #address-book-panel {
+  background-color: #ffffff;
+  border-color: #e5e5e5;
+}
+
+/* Sub-tabs (Your Notes / Address Book) */
+[data-mode="public"] [role="tablist"] button[role="tab"] {
+  color: #6b7280;
+}
+
+[data-mode="public"] [role="tablist"] button[role="tab"][aria-selected="true"] {
+  color: #5c7cfa;
+  background-color: #f0f4ff;
+}
+
+/* Table headers */
+[data-mode="public"] th {
+  color: #6b7280;
+  border-color: #e5e5e5;
+}
+
+/* Table cells */
+[data-mode="public"] td {
+  color: #374151;
+  border-color: #f0f0f0;
+}
+
+/* Wallet dropdown */
+[data-mode="public"] #wallet-dropdown {
+  background-color: #ffffff;
+  border-color: #e5e5e5;
+}
+
+[data-mode="public"] #wallet-dropdown button {
+  color: #374151;
+  background-color: transparent;
+}
+
+[data-mode="public"] #wallet-dropdown button:hover {
+  background-color: #f5f5f5;
+}
+
+/* Sync warning banner — keep as-is (amber) */
+
+/* Onboarding overlay — keep dark regardless of mode */
+[data-mode="public"] #onboarding-overlay {
+  background-color: rgba(15, 17, 25, 0.95);
+  color: #fafafa;
+}
+
+/* Scrollbar and misc dark backgrounds via class matching */
+[data-mode="public"] [class*="bg-dark-9"],
+[data-mode="public"] [class*="bg-dark-8"] {
+  background-color: #ffffff;
+}
+
+[data-mode="public"] [class*="border-dark-8"],
+[data-mode="public"] [class*="border-dark-7"] {
+  border-color: #e5e5e5;
+}
+
+/* Fix text colors on dark utility classes */
+[data-mode="public"] [class*="text-dark-5"]:not(#onboarding-overlay *) {
+  color: #6b7280;
+}
+
+[data-mode="public"] [class*="text-dark-4"]:not(#onboarding-overlay *) {
+  color: #6b7280;
+}
+
+[data-mode="public"] [class*="text-dark-3"]:not(#onboarding-overlay *) {
+  color: #4b5563;
+}
+
+[data-mode="public"] [class*="text-dark-2"]:not(#onboarding-overlay *) {
+  color: #374151;
+}
+
+[data-mode="public"] [class*="text-dark-1"]:not(#onboarding-overlay *) {
+  color: #1a1a2e;
+}
+
+[data-mode="public"] [class*="text-dark-0"]:not(#onboarding-overlay *) {
+  color: #1a1a2e;
 }
