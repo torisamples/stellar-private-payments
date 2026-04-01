@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" class="scroll-smooth" data-mode="public">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -122,6 +122,24 @@
             </div>
             <div class="flex items-center gap-3 overflow-visible">
                 <button
+                    id="guide-btn"
+                    class="public-only flex items-center gap-2 px-3 py-1.5 bg-dark-800 hover:bg-dark-700 border border-dark-700 rounded-lg text-sm text-dark-300 hover:text-brand-400 font-medium transition-all btn-press"
+                    title="Toggle user guide"
+                    aria-label="Show guide"
+                >
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                    Guide
+                </button>
+                <button
+                    id="mode-toggle-btn"
+                    class="flex items-center gap-2 px-3 py-1.5 bg-dark-800 hover:bg-dark-700 border border-dark-700 rounded-lg text-sm text-dark-300 hover:text-brand-400 font-medium transition-all btn-press"
+                    title="Toggle dev mode"
+                    aria-label="Toggle dev mode"
+                >
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                    <span id="mode-btn-text">Dev Mode</span>
+                </button>
+                <button
                     id="fund-testnet-btn"
                     class="hidden items-center gap-2 px-3 py-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-lg text-sm text-emerald-400 font-medium transition-all btn-press"
                     title="Get free testnet XLM from Friendbot"
@@ -198,6 +216,99 @@
             </div>
         </header>
 
+        <!-- User Guide Section -->
+        <section id="user-guide" class="public-only bg-white border border-dark-200 rounded-xl p-6 sm:p-8 space-y-6">
+            <div class="flex items-start justify-between gap-4">
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-bold text-dark-950 mb-2">Welcome to Stellar Private Payments</h2>
+                    <p class="text-sm text-dark-600 leading-relaxed">
+                        This sandbox lets you try privacy-preserving payments on Stellar's testnet. No real funds are used — everything here is for testing and exploration. While you can use any Stellar asset in a real privacy pool, this sandbox supports XLM.
+                    </p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <h3 class="text-sm font-semibold text-dark-950 uppercase tracking-wide">How to use the sandbox</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="p-4 bg-dark-50 border border-dark-200 rounded-lg">
+                        <div class="flex gap-3">
+                            <div class="text-2xl font-bold text-brand-500 flex-shrink-0">1</div>
+                            <div>
+                                <p class="font-semibold text-dark-950 text-sm mb-1">Install Freighter</p>
+                                <p class="text-xs text-dark-600">Download the Freighter wallet browser extension. It takes about 30 seconds to set up.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-dark-50 border border-dark-200 rounded-lg">
+                        <div class="flex gap-3">
+                            <div class="text-2xl font-bold text-brand-500 flex-shrink-0">2</div>
+                            <div>
+                                <p class="font-semibold text-dark-950 text-sm mb-1">Connect your wallet</p>
+                                <p class="text-xs text-dark-600">Click Connect Freighter in the top right corner and approve the connection. Make sure Freighter is set to Testnet.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-dark-50 border border-dark-200 rounded-lg">
+                        <div class="flex gap-3">
+                            <div class="text-2xl font-bold text-brand-500 flex-shrink-0">3</div>
+                            <div>
+                                <p class="font-semibold text-dark-950 text-sm mb-1">Get free test XLM</p>
+                                <p class="text-xs text-dark-600">Once connected, click Fund Wallet to receive free testnet XLM from Stellar's Friendbot faucet.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-dark-50 border border-dark-200 rounded-lg">
+                        <div class="flex gap-3">
+                            <div class="text-2xl font-bold text-brand-500 flex-shrink-0">4</div>
+                            <div>
+                                <p class="font-semibold text-dark-950 text-sm mb-1">Make a private payment</p>
+                                <p class="text-xs text-dark-600">Use the tabs below to deposit, withdraw, or transfer XLM — all privacy-preserving using zero-knowledge proofs.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-4 border-t border-dark-200 pt-6">
+                <h3 class="text-sm font-semibold text-dark-950 uppercase tracking-wide">How each tab works</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="p-4 bg-dark-50 border border-dark-200 rounded-lg">
+                        <p class="font-semibold text-dark-950 text-sm mb-2 flex items-center gap-2">
+                            <svg class="w-4 h-4 text-brand-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 3v18M5 10l7-7 7 7"/>
+                            </svg>
+                            Deposit
+                        </p>
+                        <p class="text-xs text-dark-600">Move XLM from your public wallet into the private pool. You'll receive private notes that represent your deposit.</p>
+                    </div>
+                    <div class="p-4 bg-dark-50 border border-dark-200 rounded-lg">
+                        <p class="font-semibold text-dark-950 text-sm mb-2 flex items-center gap-2">
+                            <svg class="w-4 h-4 text-brand-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 21V3M5 14l7 7 7-7"/>
+                            </svg>
+                            Withdraw
+                        </p>
+                        <p class="text-xs text-dark-600">Spend your private notes to move XLM back out of the pool to any Stellar address.</p>
+                    </div>
+                    <div class="p-4 bg-dark-50 border border-dark-200 rounded-lg">
+                        <p class="font-semibold text-dark-950 text-sm mb-2 flex items-center gap-2">
+                            <svg class="w-4 h-4 text-brand-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 7l-10 10M7 7h10v10"/>
+                            </svg>
+                            Transfer
+                        </p>
+                        <p class="text-xs text-dark-600">Send XLM privately to another user in the pool by spending your notes and creating new notes for the recipient.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center pt-4">
+                <button type="button" id="hide-guide-btn" class="text-sm text-dark-500 hover:text-dark-700 transition-colors font-medium">
+                    Hide this guide
+                </button>
+            </div>
+        </section>
+
         <!-- Main Content -->
         <main id="main-content" class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-4 sm:gap-6">
             
@@ -249,13 +360,13 @@
                         </svg>
                         Transfer
                     </button>
-                    <button 
+                    <button
                         type="button"
                         role="tab"
                         id="tab-transact"
                         aria-selected="false"
                         aria-controls="panel-transact"
-                        class="tab-btn flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-inset text-dark-400 hover:text-dark-200 hover:bg-dark-800"
+                        class="dev-only tab-btn flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-inset text-dark-400 hover:text-dark-200 hover:bg-dark-800"
                         data-tab="transact"
                     >
                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -271,16 +382,49 @@
                 <div class="p-4 sm:p-6">
                     
                     <!-- Deposit Panel -->
-                    <article 
+                    <article
                         role="tabpanel"
                         id="panel-deposit"
                         aria-labelledby="tab-deposit"
                         class="tab-panel space-y-6"
                     >
+                        <!-- Join Privacy Pool Callout -->
+                        <div class="p-4 sm:p-6 bg-white border-2 border-l-brand-500 border-dark-200 rounded-lg">
+                            <div class="flex gap-4">
+                                <div class="text-2xl flex-shrink-0">🔐</div>
+                                <div>
+                                    <h3 class="font-semibold text-dark-950 mb-2">Join the Privacy Pool</h3>
+                                    <p class="text-sm text-dark-600 mb-4 leading-relaxed">
+                                        Before you can deposit, your wallet needs to be registered with the privacy pool's association set. This is a one-time step that adds your key to the pool's membership tree, allowing you to create valid privacy proofs. In real life, this is managed by an Association Set Provider (ASP) that may have certain requirements for acceptance — like compliance checks. In the sandbox, you can register yourself and be automatically approved.
+                                    </p>
+                                    <p class="text-sm text-dark-600 mb-4 leading-relaxed">
+                                        Make sure to connect your wallet first. You'll be asked to sign two messages in Freighter — these derive your privacy key (no funds are moved). The sandbox handles the on-chain registration for you.
+                                    </p>
+                                    <button type="button" id="deposit-join-pool-btn" class="inline-flex items-center gap-2 px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white font-medium rounded-lg transition-colors text-sm">
+                                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M12 2a10 10 0 1 0 20 0"/>
+                                            <path d="M9 16l3 3 7-7"/>
+                                        </svg>
+                                        Join Privacy Pool
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Educational text -->
+                        <div class="text-sm text-dark-600 space-y-3">
+                            <p>
+                                Depositing converts XLM from your public wallet into private notes within the pool. Notes are like digital cash that only you can spend. Choose how to split your deposit across one or more notes below. The total must match your deposit amount.
+                            </p>
+                            <p>
+                                <strong class="text-dark-950">Why split into multiple notes?</strong> Each note is spent whole — you can't partially use one. Smaller notes give you more flexibility when making payments later. For example, splitting 100 XLM into 70 and 30 XLM notes means you can make a 30 XLM payment later without touching the rest.
+                            </p>
+                        </div>
+
                         <!-- Amount Input -->
                         <div>
                             <label for="deposit-amount" class="block text-xs font-medium text-dark-400 uppercase tracking-wide mb-2">
-                                XLM Amount to Deposit
+                                Amount to Deposit (XLM)
                             </label>
                             <div class="flex items-center gap-4">
                                 <input 
@@ -331,6 +475,10 @@
                             <legend class="block text-xs font-medium text-dark-400 uppercase tracking-wide mb-2">
                                 Output Notes <span class="normal-case text-dark-500">(how to split your deposit)</span>
                             </legend>
+                            <div class="mb-3 p-3 bg-dark-800 border border-dark-700 rounded-lg text-xs text-dark-400 space-y-2">
+                                <p>Each deposit in the sandbox creates 2 private notes. If you deposit in a single note, a dummy note of 0 XLM will be created. Need more flexibility? Make multiple deposits to build a collection of notes in different amounts.</p>
+                                <p>Note ID is auto-generated after deposit — this is your private note identifier for future transactions.</p>
+                            </div>
                             <div id="deposit-outputs" class="space-y-2">
                                 <!-- Output rows will be created from template -->
                             </div>
@@ -705,7 +853,7 @@
             </section>
 
             <!-- Sidebar -->
-            <aside class="flex flex-col gap-4 sm:gap-6 lg:sticky lg:top-6 lg:self-start">
+            <aside class="dev-only flex flex-col gap-4 sm:gap-6 lg:sticky lg:top-6 lg:self-start">
                 
                 <!-- Contract State Panel -->
                 <section class="bg-dark-900/80 backdrop-blur-sm border border-dark-800 rounded-xl overflow-hidden" aria-labelledby="contract-state-heading">
@@ -1354,6 +1502,92 @@
           }, 2000);
         }
       });
+    })();
+    </script>
+
+    <!-- Mode and Guide Toggle -->
+    <script>
+    (function() {
+      // Initialize mode from localStorage
+      function initializeMode() {
+        const savedMode = localStorage.getItem('app-mode') || 'public';
+        setMode(savedMode);
+        initializeGuideVisibility();
+      }
+
+      function setMode(mode) {
+        document.documentElement.dataset.mode = mode;
+        localStorage.setItem('app-mode', mode);
+        updateModeButton();
+      }
+
+      function updateModeButton() {
+        const btn = document.getElementById('mode-toggle-btn');
+        const btnText = document.getElementById('mode-btn-text');
+        if (!btn || !btnText) return;
+
+        const currentMode = document.documentElement.dataset.mode;
+        if (currentMode === 'public') {
+          btnText.textContent = 'Dev Mode';
+        } else {
+          btnText.textContent = 'Public Mode';
+        }
+      }
+
+      function initializeGuideVisibility() {
+        const guide = document.getElementById('user-guide');
+        if (!guide) return;
+
+        const guideHidden = localStorage.getItem('guide-hidden') === '1';
+        if (guideHidden) {
+          guide.classList.add('hidden');
+        } else {
+          guide.classList.remove('hidden');
+        }
+      }
+
+      // Mode toggle button
+      const modeBtn = document.getElementById('mode-toggle-btn');
+      if (modeBtn) {
+        modeBtn.addEventListener('click', () => {
+          const currentMode = document.documentElement.dataset.mode;
+          const newMode = currentMode === 'public' ? 'dev' : 'public';
+          setMode(newMode);
+        });
+      }
+
+      // Guide toggle button
+      const guideBtn = document.getElementById('guide-btn');
+      if (guideBtn) {
+        guideBtn.addEventListener('click', () => {
+          const guide = document.getElementById('user-guide');
+          const isHidden = guide.classList.contains('hidden');
+          if (isHidden) {
+            guide.classList.remove('hidden');
+            localStorage.setItem('guide-hidden', '0');
+          } else {
+            guide.classList.add('hidden');
+            localStorage.setItem('guide-hidden', '1');
+          }
+        });
+      }
+
+      // Hide guide button
+      const hideGuideBtn = document.getElementById('hide-guide-btn');
+      if (hideGuideBtn) {
+        hideGuideBtn.addEventListener('click', () => {
+          const guide = document.getElementById('user-guide');
+          guide.classList.add('hidden');
+          localStorage.setItem('guide-hidden', '1');
+        });
+      }
+
+      // Initialize on page load
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeMode);
+      } else {
+        initializeMode();
+      }
     })();
     </script>
 </body>
