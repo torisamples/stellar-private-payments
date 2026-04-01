@@ -154,3 +154,133 @@
     border-color: var(--color-border);
   }
 }
+
+/* Public Mode Light Theme */
+[data-mode="public"] {
+  --color-border: var(--color-dark-200);
+}
+
+[data-mode="public"] body {
+  @apply bg-white text-dark-950;
+}
+
+[data-mode="public"] h1, [data-mode="public"] h2, [data-mode="public"] h3 {
+  @apply text-dark-950;
+}
+
+[data-mode="public"] body,
+[data-mode="public"] .bg-dark-950,
+[data-mode="public"] .bg-dark-900,
+[data-mode="public"] .bg-dark-900/80 {
+  @apply bg-white;
+}
+
+[data-mode="public"] .bg-dark-800 {
+  @apply bg-dark-100;
+}
+
+[data-mode="public"] .bg-dark-700 {
+  @apply bg-dark-100;
+}
+
+[data-mode="public"] .bg-dark-600 {
+  @apply bg-dark-100;
+}
+
+[data-mode="public"] .text-dark-50 {
+  @apply text-dark-950;
+}
+
+[data-mode="public"] .text-dark-100 {
+  @apply text-dark-800;
+}
+
+[data-mode="public"] .text-dark-200 {
+  @apply text-dark-700;
+}
+
+[data-mode="public"] .text-dark-300 {
+  @apply text-dark-700;
+}
+
+[data-mode="public"] .text-dark-400 {
+  @apply text-dark-600;
+}
+
+[data-mode="public"] .text-dark-500 {
+  @apply text-dark-500;
+}
+
+[data-mode="public"] .text-dark-600,
+[data-mode="public"] .text-dark-700,
+[data-mode="public"] .text-dark-800 {
+  @apply text-dark-950;
+}
+
+[data-mode="public"] .border-dark-800 {
+  @apply border-dark-200;
+}
+
+[data-mode="public"] .border-dark-700 {
+  @apply border-dark-200;
+}
+
+[data-mode="public"] .border-dark-600 {
+  @apply border-dark-200;
+}
+
+[data-mode="public"] .bg-dark-900/80,
+[data-mode="public"] .bg-dark-800,
+[data-mode="public"] header {
+  @apply bg-dark-50 border-dark-200;
+}
+
+[data-mode="public"] .bg-dark-800.hover:bg-dark-700,
+[data-mode="public"] button[class*="bg-dark-800"] {
+  @apply bg-dark-100 hover:bg-dark-200 border-dark-200;
+}
+
+[data-mode="public"] input[type="number"],
+[data-mode="public"] input[type="text"],
+[data-mode="public"] textarea,
+[data-mode="public"] select {
+  @apply bg-white text-dark-950 border-dark-200;
+}
+
+[data-mode="public"] input[type="number"]:focus,
+[data-mode="public"] input[type="text"]:focus,
+[data-mode="public"] textarea:focus,
+[data-mode="public"] select:focus {
+  @apply border-brand-500;
+}
+
+[data-mode="public"] .tab-btn {
+  @apply text-dark-500 hover:text-dark-700 hover:bg-dark-100;
+}
+
+[data-mode="public"] .tab-btn[aria-selected="true"],
+[data-mode="public"] #tab-deposit[aria-selected="true"],
+[data-mode="public"] #tab-withdraw[aria-selected="true"],
+[data-mode="public"] #tab-transfer[aria-selected="true"],
+[data-mode="public"] #tab-transact[aria-selected="true"] {
+  @apply text-dark-950 bg-white border-dark-200 shadow-md shadow-brand-500/10;
+}
+
+[data-mode="public"] .hidden-in-public {
+  @apply hidden;
+}
+
+/* Dev-only classes are hidden in public mode */
+[data-mode="public"] .dev-only {
+  @apply hidden !important;
+}
+
+/* Public-only classes are hidden in dev mode */
+[data-mode="dev"] .public-only {
+  @apply hidden !important;
+}
+
+/* Placeholder text in light mode */
+[data-mode="public"] input::placeholder {
+  @apply text-dark-400;
+}
