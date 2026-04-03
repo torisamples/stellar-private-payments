@@ -11,6 +11,7 @@ import { fieldToHex } from '../bridge.js';
 import { publicKeyStore, notesStore, StateManager, poolStore } from '../state/index.js';
 import { bytesToHex } from '../state/utils.js';
 import { NotesTable } from './notes-table.js';
+import { ContractReader } from './contract-reader.js';
 
 // Callbacks for wallet connection events (set by transaction modules)
 const walletConnectCallbacks = [];
@@ -411,6 +412,9 @@ export const Wallet = {
                 
                 Toast.show('Public keys registered successfully!', 'success');
                 console.log('[Register] Transaction hash:', result.txHash);
+
+                // Refresh on-chain state so ASP membership count updates immediately
+                ContractReader.refreshAll();
             } else {
                 throw new Error(result.error || 'Registration failed');
             }

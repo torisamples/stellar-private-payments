@@ -38,7 +38,6 @@ export function setNotesTableRef(notesTable) {
 
 export const Deposit = {
     init() {
-        const slider = document.getElementById('deposit-slider');
         const amount = document.getElementById('deposit-amount');
         const outputs = document.getElementById('deposit-outputs');
         const btn = document.getElementById('btn-deposit');
@@ -48,19 +47,13 @@ export const Deposit = {
         joinPoolBtn?.addEventListener('click', () => {
             Wallet.registerPublicKey();
         });
-        
+
         // Create initial output rows
         outputs.appendChild(Templates.createOutputRow(0, 10));
         outputs.appendChild(Templates.createOutputRow(1, 0));
-        
-        // Sync slider and input
-        slider.addEventListener('input', () => {
-            amount.value = slider.value;
-            this.updateBalance();
-        });
-        
+
+        // Update balance when amount changes
         amount.addEventListener('input', () => {
-            slider.value = Math.min(Math.max(0, amount.value), 1000);
             this.updateBalance();
         });
         
