@@ -219,6 +219,17 @@
   background-color: #4263eb;
 }
 
+/* Preserve connected-state styling in public mode */
+[data-mode="public"] #wallet-btn.border-emerald-500 {
+  background-color: #ecfdf5;
+  border-color: #10b981;
+  color: #065f46;
+}
+
+[data-mode="public"] #wallet-btn.border-emerald-500:hover {
+  background-color: #d1fae5;
+}
+
 /* Network indicator pill */
 [data-mode="public"] header .rounded-full {
   background-color: #f0f4ff;
@@ -290,15 +301,19 @@
   color: #9ca3af;
 }
 
-/* Range slider track */
-[data-mode="public"] input[type="range"] {
-  background-color: #e5e5e5;
-}
+/* (Slider removed — deposit uses plain number input now) */
 
 /* Balance equation bar */
 [data-mode="public"] [id$="-balance"] {
   background-color: #f0f4ff;
   border-color: #dbe4ff;
+  color: #374151;
+}
+
+/* Balance equation inner boxes (Deposit: X, Outputs: X) */
+[data-mode="public"] [data-eq="input"],
+[data-mode="public"] [data-eq="outputs"] {
+  background-color: #ffffff;
   color: #374151;
 }
 

@@ -33,7 +33,7 @@ export const SyncUI = {
 
         const syncBar = document.createElement('div');
         syncBar.id = 'sync-status';
-        syncBar.className = 'fixed bottom-4 right-4 bg-gray-800 border border-gray-700 rounded-lg p-3 shadow-lg max-w-xs z-50 hidden';
+        syncBar.className = 'fixed bottom-20 right-4 bg-gray-800 border border-gray-700 rounded-lg p-3 shadow-lg max-w-xs z-40 hidden';
         syncBar.innerHTML = `
             <div class="flex items-center gap-2">
                 <div id="sync-spinner" class="animate-spin w-4 h-4 border-2 border-emerald-500 border-t-transparent rounded-full hidden"></div>
@@ -160,6 +160,7 @@ export const SyncUI = {
             
             if (status.status === 'broken') {
                 this.showWarning(status.message);
+                this.hide();
             } else if (status.status === 'complete') {
                 let msg = `Synced: ${status.poolLeavesCount} pool leaves`;
                 if (status.notesFound > 0) {
@@ -169,6 +170,10 @@ export const SyncUI = {
                 if (status.notesMarkedSpent > 0) {
                     console.log(`[SyncUI] Marked ${status.notesMarkedSpent} notes as spent`);
                 }
+                this.hide();
+            } else {
+                // Unknown status — hide the indicator to avoid lingering spinner
+                this.hide();
             }
         } catch (err) {
             console.error('[SyncUI] Sync failed:', err);
