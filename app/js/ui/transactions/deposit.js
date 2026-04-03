@@ -23,6 +23,7 @@ import {
 import { App, Utils, Toast, Storage, deriveKeysFromWallet, xlmToStroops, stroopsToXlmDisplay } from '../core.js';
 import { Templates } from '../templates.js';
 import { getTransactionErrorMessage } from '../errors.js';
+import { Wallet } from '../navigation.js';
 
 // Forward reference - set by main init
 let NotesTableRef = null;
@@ -41,6 +42,12 @@ export const Deposit = {
         const amount = document.getElementById('deposit-amount');
         const outputs = document.getElementById('deposit-outputs');
         const btn = document.getElementById('btn-deposit');
+
+        // Wire up "Join Privacy Pool" button to the wallet registration flow
+        const joinPoolBtn = document.getElementById('deposit-join-pool-btn');
+        joinPoolBtn?.addEventListener('click', () => {
+            Wallet.registerPublicKey();
+        });
         
         // Create initial output rows
         outputs.appendChild(Templates.createOutputRow(0, 10));
