@@ -20,7 +20,7 @@ import * as publicKeyStore from './public-key-store.js';
 import * as noteScanner from './note-scanner.js';
 import * as notesStore from './notes-store.js';
 import { getRetentionConfig, ledgersToDuration } from './retention-verifier.js';
-import { fetchAllPoolEvents, fetchAllASPMembershipEvents, getLatestLedger, getNetwork } from '../stellar.js';
+import { fetchAllPoolEvents, fetchAllASPMembershipEvents, getLatestLedger, getNetwork, getDeployedContracts } from '../stellar.js';
 
 /**
  * @typedef {Object} SyncStatus
@@ -167,7 +167,33 @@ export async function startSync(options = {}) {
         let metadata = await getSyncMetadata() || createDefaultMetadata();
         const latestLedger = await getLatestLedger();
         const retentionConfig = await getRetentionConfig(forceRefresh);
-        
+
+        // Detect contract address changes — if the deployed contract changed
+        // (e.g. redeployed ASP Membership), the local IndexedDB has stale data
+        // from the old contract. Clear everything and start fresh.
+        const contracts = getDeployedContracts();
+        const currentASPAddress = contracts?.aspMembership;
+        const currentPoolAddress = contracts?.pool;
+
+        if (currentASPAddress && metadata.aspMembershipSync.contractId &&
+            metadata.aspMembershipSync.contractId !== currentASPAddress) {
+            console.warn(`[SyncController] ASP Membership contract changed: ${metadata.aspMembershipSync.contractId} → ${currentASPAddress}`);
+            console.log('[SyncController] Clearing stale ASP membership data...');
+            await aspMembershipStore.clear();
+            metadata.aspMembershipSync = { lastLedger: 0, lastCursor: null, syncBroken: false, contractId: currentASPAddress };
+        }
+        if (currentPoolAddress && metadata.poolSync.contractId &&
+            metadata.poolSync.contractId !== currentPoolAddress) {
+            console.warn(`[SyncController] Pool contract changed: ${metadata.poolSync.contractId} → ${currentPoolAddress}`);
+            console.log('[SyncController] Clearing stale pool data...');
+            await poolStore.clear();
+            metadata.poolSync = { lastLedger: 0, lastCursor: null, syncBroken: false, contractId: currentPoolAddress };
+        }
+
+        // Store current contract addresses in metadata for future comparison
+        if (currentASPAddress) metadata.aspMembershipSync.contractId = currentASPAddress;
+        if (currentPoolAddress) metadata.poolSync.contractId = currentPoolAddress;
+
         // Check for sync gap
         const gapCheck = await checkSyncGap();
         if (gapCheck.status === 'broken') {
@@ -275,7 +301,31 @@ export async function startSync(options = {}) {
             
             if (onChainState.success) {
                 const onChainLeafCount = onChainState.nextIndex || 0;
-                if (localLeafCount < onChainLeafCount) {
+
+                // If local has MORE leaves than on-chain, the contract was likely
+                // redeployed (e.g. new ASP Membership contract with a fresh tree).
+                // Clear stale data and re-sync from zero.
+                if (localLeafCount > onChainLeafCount) {
+                    console.warn(`[SyncController] Local leaf count (${localLeafCount}) > on-chain (${onChainLeafCount}) — contract likely redeployed`);
+                    console.log('[SyncController] Clearing stale ASP membership data and re-syncing...');
+                    await aspMembershipStore.clear();
+                    // Re-fetch from on-chain if there are any leaves
+                    if (onChainLeafCount > 0) {
+                        try {
+                            const { readASPMembershipLeaves } = await import('../stellar.js');
+                            const result = await readASPMembershipLeaves(0, onChainLeafCount);
+                            if (result.success && result.leaves.length > 0) {
+                                for (const { index, leaf } of result.leaves) {
+                                    await aspMembershipStore.processLeafDirect(index, leaf);
+                                }
+                                console.log(`[SyncController] Re-synced ${result.leaves.length} leaves from fresh contract`);
+                            }
+                        } catch (e) {
+                            console.warn('[SyncController] Failed to re-sync after contract change:', e.message);
+                            metadata.aspMembershipSync.syncBroken = true;
+                        }
+                    }
+                } else if (localLeafCount < onChainLeafCount) {
                     console.warn(`[SyncController] ASP Membership gap: on-chain has ${onChainLeafCount}, local has ${localLeafCount}`);
                     console.log('[SyncController] Attempting on-chain leaf recovery via get_leaves...');
 
