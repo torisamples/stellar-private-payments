@@ -856,6 +856,10 @@ initializeNetwork();
 let poolClient = null;
 let poolClientPublicKey = null;
 
+// ASP Membership contract client cache
+let aspMembershipClient = null;
+let aspMembershipClientPublicKey = null;
+
 /**
  * Creates a signer object compatible with the Stellar SDK contract client.
  * Uses Freighter wallet for signing transactions and auth entries.
@@ -943,6 +947,84 @@ export async function getPoolClient(signerOptions, forceRefresh = false) {
 
     console.log('[Stellar] Pool contract client ready');
     return poolClient;
+}
+
+/**
+ * Returns a Soroban contract client for the ASP Membership contract.
+ * Caches the client per signer.
+ *
+ * @param {Object} signerOptions - { publicKey, signTransaction, signAuthEntry }
+ * @param {boolean} [forceRefresh=false]
+ * @returns {Promise<contract.Client>}
+ */
+export async function getASPMembershipClient(signerOptions, forceRefresh = false) {
+    const contracts = getDeployedContracts();
+    if (!contracts?.aspMembership) {
+        throw new Error('Deployments not loaded or ASP Membership contract not found.');
+    }
+
+    const network = getNetwork();
+
+    const signerChanged =
+        aspMembershipClient &&
+        aspMembershipClientPublicKey &&
+        aspMembershipClientPublicKey !== signerOptions.publicKey;
+
+    if (signerChanged) {
+        console.log('[Stellar] ASP Membership client signer changed - refreshing');
+        forceRefresh = true;
+    }
+
+    if (aspMembershipClient && !forceRefresh) {
+        return aspMembershipClient;
+    }
+
+    const signer = createFreighterSigner(
+        signerOptions.publicKey,
+        network.passphrase,
+        signerOptions.signTransaction,
+        signerOptions.signAuthEntry
+    );
+
+    console.log('[Stellar] Loading ASP Membership contract client from RPC...');
+    aspMembershipClient = await contract.Client.from({
+        contractId: contracts.aspMembership,
+        rpcUrl: network.rpcUrl,
+        networkPassphrase: network.passphrase,
+        publicKey: signerOptions.publicKey,
+        signTransaction: signer.signTransaction,
+        signAuthEntry: signer.signAuthEntry,
+    });
+    aspMembershipClientPublicKey = signerOptions.publicKey;
+
+    console.log('[Stellar] ASP Membership contract client ready');
+    return aspMembershipClient;
+}
+
+/**
+ * Inserts a leaf into the ASP Membership Merkle tree.
+ * Requires AdminInsertOnly=false on-chain, or the caller to be the admin.
+ *
+ * @param {Object} params
+ * @param {bigint} params.leaf - The membership leaf value (poseidon2 hash)
+ * @param {Object} params.signerOptions - { publicKey, signTransaction, signAuthEntry }
+ * @returns {Promise<{success: boolean, txHash?: string, error?: string}>}
+ */
+export async function insertASPMembershipLeaf(params) {
+    const { leaf, signerOptions } = params;
+    try {
+        console.log('[Stellar] Inserting ASP membership leaf...');
+        const client = await getASPMembershipClient(signerOptions);
+        const tx = await client.insert_leaf({ leaf });
+        const sent = await tx.signAndSend();
+        const txHash = sent.sendTransactionResponse?.hash;
+
+        console.log('[Stellar] ASP membership leaf inserted:', txHash);
+        return { success: true, txHash };
+    } catch (error) {
+        console.error('[Stellar] ASP membership leaf insert failed:', error);
+        return { success: false, error: error.message || String(error) };
+    }
 }
 
 /**

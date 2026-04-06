@@ -4,10 +4,10 @@
  */
 
 import { connectWallet, getWalletNetwork, signWalletTransaction, signWalletAuthEntry } from '../wallet.js';
-import { validateWalletNetwork, registerPublicKey, getLatestLedger } from '../stellar.js';
+import { validateWalletNetwork, registerPublicKey, insertASPMembershipLeaf, getLatestLedger } from '../stellar.js';
 import { App, Utils, Toast, deriveKeysFromWallet, Storage } from './core.js';
 import { setTabsRef } from './templates.js';
-import { fieldToHex } from '../bridge.js';
+import { fieldToHex, bigintToField, poseidon2Hash2, bytesToBigIntLE } from '../bridge.js';
 import { publicKeyStore, notesStore, StateManager, poolStore } from '../state/index.js';
 import { bytesToHex } from '../state/utils.js';
 import { NotesTable } from './notes-table.js';
@@ -275,6 +275,10 @@ export const Wallet = {
             btn.classList.add('border-emerald-500', 'bg-emerald-500/10');
             text.textContent = Utils.truncateHex(App.state.wallet.address, 7, 6);
             dropdownIcon?.classList.remove('hidden');
+
+            // Populate dropdown address immediately so inline scripts (e.g. Fund Wallet) can read it
+            const addressDisplay = document.getElementById('wallet-dropdown-address');
+            if (addressDisplay) addressDisplay.textContent = publicKey;
         } catch (e) {
             console.error('Wallet connection error:', e);
             const message = e?.code === 'USER_REJECTED'
@@ -409,9 +413,34 @@ export const Wallet = {
                 } catch (storeError) {
                     console.warn('[Register] Failed to add to local store:', storeError);
                 }
-                
-                Toast.show('Public keys registered successfully!', 'success');
+
+                Toast.show('Public keys registered! Adding to membership tree...', 'info');
                 console.log('[Register] Transaction hash:', result.txHash);
+
+                // Compute the ASP membership leaf: poseidon2(pubKey, blinding=0, domain=1)
+                const membershipBlindingBytes = bigintToField(0n);
+                const membershipLeaf = poseidon2Hash2(pubKeyBytes, membershipBlindingBytes, 1);
+                const membershipLeafBigInt = bytesToBigIntLE(membershipLeaf);
+
+                console.log('[Register] Membership leaf:', membershipLeafBigInt.toString().slice(0, 20) + '...');
+
+                // Insert the membership leaf into the ASP Membership Merkle tree
+                const leafResult = await insertASPMembershipLeaf({
+                    leaf: membershipLeafBigInt,
+                    signerOptions: {
+                        publicKey: App.state.wallet.address,
+                        signTransaction: signWalletTransaction,
+                        signAuthEntry: signWalletAuthEntry,
+                    },
+                });
+
+                if (leafResult.success) {
+                    Toast.show('Joined privacy pool successfully!', 'success');
+                    console.log('[Register] ASP membership leaf tx:', leafResult.txHash);
+                } else {
+                    console.warn('[Register] ASP membership leaf insert failed:', leafResult.error);
+                    Toast.show('Registered keys but failed to join ASP: ' + leafResult.error, 'error');
+                }
 
                 // Refresh on-chain state so ASP membership count updates immediately
                 ContractReader.refreshAll();
