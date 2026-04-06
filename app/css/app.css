@@ -402,13 +402,13 @@
 }
 
 /* Scrollbar and misc dark backgrounds via class matching */
-[data-mode="public"] [class*="bg-dark-9"],
-[data-mode="public"] [class*="bg-dark-8"] {
+[data-mode="public"] [class*="bg-dark-9"]:not(#onboarding-overlay *),
+[data-mode="public"] [class*="bg-dark-8"]:not(#onboarding-overlay *) {
   background-color: #ffffff;
 }
 
-[data-mode="public"] [class*="border-dark-8"],
-[data-mode="public"] [class*="border-dark-7"] {
+[data-mode="public"] [class*="border-dark-8"]:not(#onboarding-overlay *),
+[data-mode="public"] [class*="border-dark-7"]:not(#onboarding-overlay *) {
   border-color: #e5e5e5;
 }
 
