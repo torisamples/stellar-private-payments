@@ -112,6 +112,43 @@ export async function processLeafAdded(event, ledger) {
 }
 
 /**
+ * Processes a leaf read directly from on-chain contract storage (get_leaves).
+ * Used for recovery when events have aged out of the RPC retention window.
+ * @param {number} index - Leaf index
+ * @param {string} leafHex - Leaf value as hex string (BE)
+ * @returns {Promise<void>}
+ */
+export async function processLeafDirect(index, leafHex) {
+    const leaf = normalizeU256ToHex(leafHex);
+
+    // Skip if already stored
+    const existing = await db.get('asp_membership_leaves', index);
+    if (existing) {
+        return;
+    }
+
+    // Store leaf (no root or ledger available from contract storage reads)
+    await db.put('asp_membership_leaves', {
+        index,
+        leaf,
+        root: null,
+        ledger: 0,
+    });
+
+    // Update merkle tree
+    if (merkleTree) {
+        const nextIdx = Number(merkleTree.next_index);
+        if (index !== nextIdx) {
+            throw new Error(`Out-of-order insertion: expected ${nextIdx}, got ${index}`);
+        }
+        const leafBytes = hexToBytesForTree(leaf);
+        merkleTree.insert(leafBytes);
+    }
+
+    console.log(`[ASPMembershipStore] Recovered leaf at index ${index} from contract`);
+}
+
+/**
  * Processes a batch of ASP Membership events.
  * @param {Array} events - Parsed events with topic and value
  * @param {number} ledger - Default ledger if not in event

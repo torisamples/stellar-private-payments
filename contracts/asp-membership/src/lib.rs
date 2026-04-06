@@ -28,6 +28,8 @@ enum DataKey {
     Root,
     /// Whether admin permission is required to insert a leaf
     AdminInsertOnly,
+    /// Individual leaf values stored by index (for on-chain recovery)
+    Leaf(u64),
 }
 
 /// Contract error types
@@ -206,6 +208,9 @@ impl ASPMembership {
         if current_index >= (1 << levels) {
             return Err(Error::MerkleTreeFull);
         }
+        // Persist the leaf value on-chain so it can be recovered without events
+        store.set(&DataKey::Leaf(actual_index), &leaf);
+
         let mut current_hash = leaf.clone();
 
         // Update tree by recomputing hashes along the path to root
@@ -238,6 +243,35 @@ impl ASPMembership {
         // Update NextIndex
         store.set(&DataKey::NextIndex, &(actual_index + 1));
         Ok(())
+    }
+
+    /// Read a batch of leaf values from on-chain storage.
+    ///
+    /// Returns up to `count` leaves starting from `start` index. This enables
+    /// the frontend to reconstruct the full Merkle tree from contract state
+    /// instead of relying on events (which expire from the RPC retention
+    /// window after ~7 days).
+    ///
+    /// # Arguments
+    /// * `env` - The Soroban environment
+    /// * `start` - Starting leaf index (inclusive)
+    /// * `count` - Maximum number of leaves to return
+    ///
+    /// # Returns
+    /// A Vec of (index, leaf) pairs for leaves that exist in the range.
+    /// Missing indices (from before this storage upgrade) are skipped.
+    pub fn get_leaves(env: Env, start: u64, count: u64) -> Vec<(u64, U256)> {
+        let store = env.storage().persistent();
+        let next_index: u64 = store.get(&DataKey::NextIndex).unwrap_or(0);
+        let end = core::cmp::min(start + count, next_index);
+
+        let mut result: Vec<(u64, U256)> = Vec::new(&env);
+        for i in start..end {
+            if let Some(leaf) = store.get::<DataKey, U256>(&DataKey::Leaf(i)) {
+                result.push_back((i, leaf));
+            }
+        }
+        result
     }
 }
 

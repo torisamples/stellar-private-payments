@@ -274,6 +274,76 @@ export async function readASPMembershipState(contractId) {
 }
 
 /**
+ * Read leaf values directly from the ASP Membership contract storage.
+ * This bypasses the event-based sync and reads persisted leaves on-chain,
+ * solving the RPC retention window problem.
+ *
+ * @param {number} start - Starting leaf index (inclusive)
+ * @param {number} count - Maximum number of leaves to fetch
+ * @param {string} [contractId] - Contract address, defaults to deployed address
+ * @returns {Promise<{success: boolean, leaves?: Array<{index: number, leaf: string}>, error?: string}>}
+ */
+export async function readASPMembershipLeaves(start, count, contractId) {
+    const contracts = getDeployedContracts();
+    contractId = contractId ?? contracts?.aspMembership;
+    if (!contractId) {
+        return { success: false, error: 'Contract address not provided and deployments not loaded' };
+    }
+
+    try {
+        const network = getNetwork();
+        const server = getSorobanServer();
+
+        // Build a read-only transaction to call get_leaves(start, count)
+        const sourceAccount = new StellarSdk.Account(
+            'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF',
+            '0'
+        );
+
+        const contractInstance = new StellarSdk.Contract(contractId);
+        const tx = new StellarSdk.TransactionBuilder(sourceAccount, {
+            fee: '100',
+            networkPassphrase: network.passphrase,
+        })
+            .addOperation(contractInstance.call(
+                'get_leaves',
+                xdr.ScVal.scvU64(new xdr.Uint64(start)),
+                xdr.ScVal.scvU64(new xdr.Uint64(count)),
+            ))
+            .setTimeout(30)
+            .build();
+
+        const simResult = await server.simulateTransaction(tx);
+        if (!StellarSdk.SorobanRpc.Api.isSimulationSuccess(simResult)) {
+            return { success: false, error: simResult.error || 'Simulation failed' };
+        }
+
+        // Parse the result: Vec<(u64, U256)>
+        const resultVal = simResult.result.retval;
+        const leaves = [];
+
+        if (resultVal.switch().name === 'scvVec') {
+            const vec = resultVal.vec();
+            for (let i = 0; i < vec.length; i++) {
+                const tuple = vec[i];
+                if (tuple.switch().name === 'scvMap') {
+                    const map = tuple.map();
+                    const index = Number(scValToNative(map[0].val()));
+                    const leafHex = formatU256(map[1].val());
+                    leaves.push({ index, leaf: leafHex });
+                }
+            }
+        }
+
+        console.log(`[Stellar] Read ${leaves.length} leaves from contract (start=${start}, count=${count})`);
+        return { success: true, leaves };
+    } catch (error) {
+        console.error('[Stellar] Failed to read ASP Membership leaves:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+/**
  * Read ASP Non-Membership contract state (Sparse Merkle Tree).
  * Storage keys: Admin, Root, Node(U256)
  * @param {string} [contractId] - Contract address, defaults to deployed address
