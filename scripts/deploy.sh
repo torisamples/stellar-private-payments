@@ -37,8 +37,8 @@ Examples:
   scripts/deploy.sh futurenet \
     --deployer alice \
     --token CB... \
-    --asp-levels 8 \
-    --pool-levels 8 \
+    --asp-levels 10 \
+    --pool-levels 10 \
     --max-deposit 1000000000 \
     --vk-file ./vk.json
 

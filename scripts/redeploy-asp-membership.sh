@@ -26,7 +26,7 @@ WASM_DIR="$ROOT_DIR/target/stellar"
 
 NETWORK="testnet"
 DEPLOYER=""
-ASP_LEVELS="8"
+ASP_LEVELS="10"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
