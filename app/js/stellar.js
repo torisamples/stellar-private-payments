@@ -3,7 +3,7 @@
  * Specialized for Pool, ASP Membership, and ASP Non-Membership contracts
  * @see https://developers.stellar.org/docs/build/guides/dapps/frontend-guide
  */
-import { Horizon, rpc, Networks, Address, xdr, scValToNative as sdkScValToNative, contract, ScInt } from '@stellar/stellar-sdk';
+import { Horizon, rpc, Networks, Address, xdr, scValToNative as sdkScValToNative, contract, ScInt, Account, Contract, TransactionBuilder } from '@stellar/stellar-sdk';
 
 const SUPPORTED_NETWORK = 'testnet';
 
@@ -295,13 +295,13 @@ export async function readASPMembershipLeaves(start, count, contractId) {
         const server = getSorobanServer();
 
         // Build a read-only transaction to call get_leaves(start, count)
-        const sourceAccount = new StellarSdk.Account(
+        const sourceAccount = new Account(
             'GAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWHF',
             '0'
         );
 
-        const contractInstance = new StellarSdk.Contract(contractId);
-        const tx = new StellarSdk.TransactionBuilder(sourceAccount, {
+        const contractInstance = new Contract(contractId);
+        const tx = new TransactionBuilder(sourceAccount, {
             fee: '100',
             networkPassphrase: network.passphrase,
         })
@@ -314,7 +314,7 @@ export async function readASPMembershipLeaves(start, count, contractId) {
             .build();
 
         const simResult = await server.simulateTransaction(tx);
-        if (!StellarSdk.SorobanRpc.Api.isSimulationSuccess(simResult)) {
+        if (!rpc.Api.isSimulationSuccess(simResult)) {
             return { success: false, error: simResult.error || 'Simulation failed' };
         }
 
@@ -329,7 +329,8 @@ export async function readASPMembershipLeaves(start, count, contractId) {
                 if (tuple.switch().name === 'scvMap') {
                     const map = tuple.map();
                     const index = Number(scValToNative(map[0].val()));
-                    const leafHex = formatU256(map[1].val());
+                    const leafNative = scValToNative(map[1].val());
+                    const leafHex = formatU256(leafNative);
                     leaves.push({ index, leaf: leafHex });
                 }
             }
