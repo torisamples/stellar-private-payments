@@ -276,11 +276,45 @@ export async function startSync(options = {}) {
             if (onChainState.success) {
                 const onChainLeafCount = onChainState.nextIndex || 0;
                 if (localLeafCount < onChainLeafCount) {
-                    console.warn('[SyncController] ASP Membership sync incomplete:');
-                    console.warn(`  On-chain has ${onChainLeafCount} leaves, local has ${localLeafCount}`);
-                    console.warn('  Some events may be outside RPC retention window (24h-7d)');
-                    console.warn('  Admin may need to re-add missing membership leaves');
-                    metadata.aspMembershipSync.syncBroken = true;
+                    console.warn(`[SyncController] ASP Membership gap: on-chain has ${onChainLeafCount}, local has ${localLeafCount}`);
+                    console.log('[SyncController] Attempting on-chain leaf recovery via get_leaves...');
+
+                    // Try to recover missing leaves directly from contract storage
+                    try {
+                        const { readASPMembershipLeaves } = await import('../stellar.js');
+                        const BATCH_SIZE = 50;
+                        let recovered = 0;
+
+                        for (let start = localLeafCount; start < onChainLeafCount; start += BATCH_SIZE) {
+                            const count = Math.min(BATCH_SIZE, onChainLeafCount - start);
+                            const result = await readASPMembershipLeaves(start, count);
+
+                            if (result.success && result.leaves.length > 0) {
+                                for (const { index, leaf } of result.leaves) {
+                                    await aspMembershipStore.processLeafDirect(index, leaf);
+                                    recovered++;
+                                }
+                                if (onProgress) {
+                                    onProgress({ phase: 'asp_membership', progress: 50 + Math.round(50 * (start + count) / onChainLeafCount) });
+                                }
+                            } else if (!result.success) {
+                                console.warn('[SyncController] On-chain leaf recovery failed:', result.error);
+                                break;
+                            }
+                        }
+
+                        if (recovered > 0) {
+                            console.log(`[SyncController] Recovered ${recovered} leaves from contract storage`);
+                            const newLocalCount = await aspMembershipStore.getLeafCount();
+                            metadata.aspMembershipSync.syncBroken = newLocalCount < onChainLeafCount;
+                        } else {
+                            console.warn('[SyncController] No leaves recovered — contract may not support get_leaves yet');
+                            metadata.aspMembershipSync.syncBroken = true;
+                        }
+                    } catch (recoveryError) {
+                        console.warn('[SyncController] On-chain leaf recovery error:', recoveryError.message);
+                        metadata.aspMembershipSync.syncBroken = true;
+                    }
                 } else {
                     console.log(`[SyncController] ASP Membership in sync: ${localLeafCount}/${onChainLeafCount} leaves`);
                 }

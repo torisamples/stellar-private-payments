@@ -645,3 +645,73 @@ fn test_merkle_consistency() {
         assert_eq!(on_chain_root, off_chain_roots.get(i + 1).unwrap());
     }
 }
+
+#[test]
+fn test_get_leaves_returns_inserted_leaves() {
+    let env = test_env();
+    let admin = Address::generate(&env);
+    let contract_id = env.register(ASPMembership, (admin, 3u32));
+    let client = ASPMembershipClient::new(&env, &contract_id);
+
+    env.mock_all_auths();
+
+    let leaf1 = U256::from_u32(&env, 100u32);
+    let leaf2 = U256::from_u32(&env, 200u32);
+    let leaf3 = U256::from_u32(&env, 300u32);
+    client.insert_leaf(&leaf1);
+    client.insert_leaf(&leaf2);
+    client.insert_leaf(&leaf3);
+
+    // Read all leaves
+    let leaves = client.get_leaves(&0, &10);
+    assert_eq!(leaves.len(), 3, "Should return 3 leaves");
+    assert_eq!(leaves.get(0).unwrap(), (0u64, leaf1));
+    assert_eq!(leaves.get(1).unwrap(), (1u64, leaf2));
+    assert_eq!(leaves.get(2).unwrap(), (2u64, leaf3));
+}
+
+#[test]
+fn test_get_leaves_pagination() {
+    let env = test_env();
+    let admin = Address::generate(&env);
+    let contract_id = env.register(ASPMembership, (admin, 3u32));
+    let client = ASPMembershipClient::new(&env, &contract_id);
+
+    env.mock_all_auths();
+
+    for i in 0..5u32 {
+        client.insert_leaf(&U256::from_u32(&env, (i + 1) * 100));
+    }
+
+    // Read leaves 2..4 (indices 2 and 3)
+    let leaves = client.get_leaves(&2, &2);
+    assert_eq!(leaves.len(), 2, "Should return 2 leaves");
+    assert_eq!(leaves.get(0).unwrap().0, 2u64);
+    assert_eq!(leaves.get(1).unwrap().0, 3u64);
+}
+
+#[test]
+fn test_get_leaves_empty_tree() {
+    let env = test_env();
+    let admin = Address::generate(&env);
+    let contract_id = env.register(ASPMembership, (admin, 3u32));
+    let client = ASPMembershipClient::new(&env, &contract_id);
+
+    let leaves = client.get_leaves(&0, &10);
+    assert_eq!(leaves.len(), 0, "Empty tree should return no leaves");
+}
+
+#[test]
+fn test_get_leaves_out_of_range() {
+    let env = test_env();
+    let admin = Address::generate(&env);
+    let contract_id = env.register(ASPMembership, (admin, 3u32));
+    let client = ASPMembershipClient::new(&env, &contract_id);
+
+    env.mock_all_auths();
+    client.insert_leaf(&U256::from_u32(&env, 100));
+
+    // Start beyond next_index
+    let leaves = client.get_leaves(&5, &10);
+    assert_eq!(leaves.len(), 0, "Out-of-range start should return no leaves");
+}

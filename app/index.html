@@ -394,11 +394,14 @@
                                 <div class="text-2xl flex-shrink-0">🔐</div>
                                 <div>
                                     <h3 class="font-semibold text-dark-950 mb-2">Join the Privacy Pool</h3>
-                                    <p class="text-sm text-dark-600 mb-4 leading-relaxed">
-                                        Before you can deposit, your wallet needs to be registered with the privacy pool's association set. This is a one-time step that adds your key to the pool's membership tree, allowing you to create valid privacy proofs. In real life, this is managed by an Association Set Provider (ASP) that may have certain requirements for acceptance — like compliance checks. In the sandbox, you can register yourself and be automatically approved.
+                                    <p class="text-sm text-dark-600 mb-3 leading-relaxed">
+                                        Before you can deposit, your wallet needs to be registered with the privacy pool's <strong class="text-dark-950">association set</strong> — a Merkle tree that tracks approved members. This is a one-time step that adds a commitment derived from your key to the membership tree, allowing you to generate valid zero-knowledge proofs for deposits and transfers.
                                     </p>
-                                    <p class="text-sm text-dark-600 mb-4 leading-relaxed">
-                                        Make sure to connect your wallet first. You'll be asked to sign two messages in Freighter — these derive your privacy key (no funds are moved). The sandbox handles the on-chain registration for you.
+                                    <p class="text-sm text-dark-600 mb-3 leading-relaxed">
+                                        <strong class="text-dark-950">How it works:</strong> You'll sign two messages in Freighter to derive your privacy key (no funds are moved). The sandbox then registers your public key on the Pool contract and inserts your membership leaf into the ASP Membership contract's Merkle tree — two on-chain transactions.
+                                    </p>
+                                    <p class="text-sm text-dark-500 mb-4 leading-relaxed" style="font-style: italic;">
+                                        <strong>Sandbox note:</strong> In a production system, the Association Set Provider (ASP) is an independent operator that controls who can join — typically after compliance checks like KYC. Here, the ASP contract is open (anyone can insert), so you approve yourself instantly. The membership tree is also stored fully on-chain so the sandbox stays functional without any backend infrastructure.
                                     </p>
                                     <button type="button" id="deposit-join-pool-btn" class="inline-flex items-center gap-2 px-4 py-2 bg-brand-500 hover:bg-brand-600 text-white font-medium rounded-lg transition-colors text-sm">
                                         <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
