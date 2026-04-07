@@ -33,6 +33,8 @@ jobs:
         with:
           tool: cargo-llvm-cov
       - run: cargo llvm-cov --workspace --lcov --output-path lcov.info --ignore-filename-regex '^examples/'
+        env:
+          BUILD_TESTS: "1"
 
       - name: Upload head coverage artifact (for stacked PRs)
         uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4
@@ -101,6 +103,8 @@ jobs:
       - name: Run base coverage (fallback path)
         if: ${{ steps.base_art.outputs.found == 'false' }}
         run: cargo llvm-cov --workspace --lcov --output-path base.lcov.info --ignore-filename-regex '^examples/'
+        env:
+          BUILD_TESTS: "1"
 
       # 3) Extract base coverage (from artifact or from freshly computed fallback)
       - name: Extract total coverage % (base)
