@@ -367,9 +367,14 @@ export const Wallet = {
             Toast.show('Please connect your wallet first', 'error');
             return;
         }
-        
-        Toast.show('Preparing registration...', 'info');
-        
+
+        const joinBtn = document.getElementById('deposit-join-pool-btn');
+        const originalHTML = joinBtn?.innerHTML;
+        if (joinBtn) {
+            joinBtn.disabled = true;
+            joinBtn.innerHTML = '<span class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span> Joining...';
+        }
+
         try {
             // Derive both keypairs from wallet signatures
             const { pubKeyBytes, encryptionKeypair } = await deriveKeysFromWallet({
@@ -437,9 +442,21 @@ export const Wallet = {
                 if (leafResult.success) {
                     Toast.show('Joined privacy pool successfully!', 'success');
                     console.log('[Register] ASP membership leaf tx:', leafResult.txHash);
+                    // Mark button as completed
+                    if (joinBtn) {
+                        joinBtn.innerHTML = '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Already joined privacy pool';
+                        joinBtn.disabled = true;
+                        joinBtn.classList.remove('bg-brand-500', 'hover:bg-brand-600');
+                        joinBtn.classList.add('bg-dark-700', 'text-dark-400', 'cursor-not-allowed');
+                    }
                 } else {
                     console.warn('[Register] ASP membership leaf insert failed:', leafResult.error);
                     Toast.show('Registered keys but failed to join ASP: ' + leafResult.error, 'error');
+                    // Restore button on ASP failure
+                    if (joinBtn) {
+                        joinBtn.disabled = false;
+                        joinBtn.innerHTML = originalHTML;
+                    }
                 }
 
                 // Refresh on-chain state so ASP membership count updates immediately
@@ -450,6 +467,11 @@ export const Wallet = {
         } catch (e) {
             console.error('[Register] Failed:', e);
             Toast.show('Registration failed: ' + e.message, 'error');
+            // Restore button on error
+            if (joinBtn) {
+                joinBtn.disabled = false;
+                joinBtn.innerHTML = originalHTML;
+            }
         }
     }
 };

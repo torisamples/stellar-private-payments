@@ -54,6 +54,19 @@ export const NotesTable = {
         if (notes.length === 0) {
             empty.classList.remove('hidden');
             empty.classList.add('flex');
+
+            // Show context-aware empty message
+            const emptyMsg = empty.querySelector('p');
+            if (emptyMsg) {
+                const allNotes = App.state.notes;
+                if (this.filter === 'spent' && allNotes.length > 0) {
+                    emptyMsg.textContent = 'No spent notes yet.';
+                } else if (this.filter === 'unspent' && allNotes.length > 0) {
+                    emptyMsg.textContent = 'All notes have been spent.';
+                } else {
+                    emptyMsg.textContent = 'No notes yet. Make a deposit to create your first note.';
+                }
+            }
             return;
         }
         
