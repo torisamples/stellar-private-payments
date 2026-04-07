@@ -4,10 +4,11 @@
  */
 
 import { signWalletTransaction, signWalletAuthEntry } from '../../wallet.js';
-import { 
+import {
     readPoolState,
     readASPMembershipState,
     readASPNonMembershipState,
+    readASPMembershipLeaves,
     getDeployedContracts,
     submitDeposit,
 } from '../../stellar.js';
@@ -180,19 +181,36 @@ export const Deposit = {
                 nonMembership: nonMembershipRoot.toString(16),
             });
             
-            // Check if ASP membership is properly synced
+            // Ensure ASP membership tree is up-to-date before generating proof.
+            // This catches cases where the user (or someone else) joined since the
+            // last sync, which would leave the local tree with a stale root.
             const localMembershipLeafCount = await StateManager.getASPMembershipLeafCount();
             const onChainMembershipLeafCount = membershipState.nextIndex || 0;
-            
+
             console.log('[Deposit] ASP Membership sync status:', {
                 localLeaves: localMembershipLeafCount,
                 onChainLeaves: onChainMembershipLeafCount,
             });
-            
-            if (onChainMembershipLeafCount > 0 && localMembershipLeafCount === 0) {
-                console.warn('[Deposit] ASP Membership tree not synced. On-chain has', onChainMembershipLeafCount, 'leaves but local has 0.');
-                console.warn('[Deposit] This usually means the LeafAdded events are outside the RPC retention window (24h-7d).');
-                console.warn('[Deposit] The deposit may fail if your membership cannot be proven.');
+
+            if (localMembershipLeafCount < onChainMembershipLeafCount) {
+                setLoadingText('Syncing ASP membership tree...');
+                console.log(`[Deposit] Local tree behind (${localMembershipLeafCount} < ${onChainMembershipLeafCount}), fetching missing leaves...`);
+                try {
+                    const BATCH_SIZE = 50;
+                    for (let start = localMembershipLeafCount; start < onChainMembershipLeafCount; start += BATCH_SIZE) {
+                        const count = Math.min(BATCH_SIZE, onChainMembershipLeafCount - start);
+                        const result = await readASPMembershipLeaves(start, count);
+                        if (result.success && result.leaves.length > 0) {
+                            const { aspMembershipStore } = await import('../../state/index.js');
+                            for (const { index, leaf } of result.leaves) {
+                                await aspMembershipStore.processLeafDirect(index, leaf);
+                            }
+                        }
+                    }
+                    console.log('[Deposit] ASP membership tree synced to', onChainMembershipLeafCount, 'leaves');
+                } catch (syncErr) {
+                    console.warn('[Deposit] ASP membership sync failed, proceeding with local state:', syncErr.message);
+                }
             }
             
             // Step 3: Build output notes

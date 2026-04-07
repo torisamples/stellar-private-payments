@@ -44,11 +44,13 @@ const test = base.extend({
 
     // Inject Freighter mock at context level so it runs on every page
     // (including the initial blank page) before any scripts execute.
+    // Also dismiss the onboarding overlay so it doesn't block interactions.
     await context.addInitScript(`
       ${freighterMockSource}
       installFreighterMock({
         publicKey: '${testPublicKey}',
       });
+      localStorage.setItem('onboarding-seen', '1');
     `);
 
     await use(context);
