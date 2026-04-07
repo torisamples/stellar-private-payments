@@ -50,4 +50,5 @@ scripts/testdata/*
 docs/book/
 
 # Ceremony
-ceremony/
+ceremony/.env.local
+.vercel/
