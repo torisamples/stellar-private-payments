@@ -26,7 +26,7 @@ WASM_DIR="$ROOT_DIR/target/stellar"
 
 NETWORK="testnet"
 DEPLOYER=""
-ASP_LEVELS="8"
+ASP_LEVELS="10"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -102,9 +102,15 @@ cat >&2 <<EOF
   The old ASP membership tree has been reset to 0 members.
   All users will need to click "Join Privacy Pool" again.
 
+  IMPORTANT: The pool contract still references the OLD ASP membership
+  address.  Run the update script to fix this:
+
+    scripts/update-pool-asp-membership.sh --deployer $DEPLOYER
+
   Next steps:
-    1. Commit the updated deployments.json
-    2. Push to main to trigger CI/CD deploy
-    3. Existing users re-join the privacy pool via the UI
+    1. Run scripts/update-pool-asp-membership.sh --deployer $DEPLOYER
+    2. Commit the updated deployments.json
+    3. Push to main to trigger CI/CD deploy
+    4. Existing users re-join the privacy pool via the UI
 
 EOF
