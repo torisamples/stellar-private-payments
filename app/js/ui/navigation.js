@@ -446,8 +446,9 @@ export const Wallet = {
                     if (joinBtn) {
                         joinBtn.innerHTML = '<svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Already joined privacy pool';
                         joinBtn.disabled = true;
-                        joinBtn.classList.remove('bg-brand-500', 'hover:bg-brand-600');
-                        joinBtn.classList.add('bg-dark-700', 'text-dark-400', 'cursor-not-allowed');
+                        joinBtn.classList.remove('bg-brand-500', 'hover:bg-brand-600', 'text-white');
+                        joinBtn.classList.add('cursor-not-allowed', 'opacity-60');
+                        joinBtn.style.cssText = 'background:#374151;color:#9ca3af;pointer-events:none;';
                     }
                 } else {
                     console.warn('[Register] ASP membership leaf insert failed:', leafResult.error);

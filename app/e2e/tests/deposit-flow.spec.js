@@ -66,6 +66,13 @@ test.describe("Deposit End-to-End Flow", () => {
 
     console.log("[test] Page loaded and app initialised");
 
+    // Dismiss onboarding overlay if visible (blocks wallet button clicks)
+    await page.evaluate(() => {
+      const overlay = document.getElementById('onboarding-overlay');
+      if (overlay) overlay.classList.add('hidden');
+      localStorage.setItem('onboarding-seen', '1');
+    });
+
     // --- Step 2: Connect the wallet ---
     await connectWallet(page);
 

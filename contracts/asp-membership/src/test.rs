@@ -713,5 +713,9 @@ fn test_get_leaves_out_of_range() {
 
     // Start beyond next_index
     let leaves = client.get_leaves(&5, &10);
-    assert_eq!(leaves.len(), 0, "Out-of-range start should return no leaves");
+    assert_eq!(
+        leaves.len(),
+        0,
+        "Out-of-range start should return no leaves"
+    );
 }
