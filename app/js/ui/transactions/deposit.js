@@ -325,6 +325,7 @@ export const Deposit = {
                     ledger: submitResult.ledger || 0,
                     owner: App.state.wallet.address,
                     isReceived: false,
+                    txHash: submitResult.txHash || undefined,
                 });
             }
             if (NotesTableRef) NotesTableRef.render();

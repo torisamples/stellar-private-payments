@@ -39,6 +39,8 @@ import {
  * @property {boolean} spent - Whether the note has been spent
  * @property {number} [spentAtLedger] - Ledger when spent
  * @property {boolean} [isReceived] - True if note was received via transfer (vs created by user)
+ * @property {string} [txHash] - Transaction hash from when this note was created
+ * @property {string} [spentTxHash] - Transaction hash from when this note was spent
  */
 
 // Current owner address for filtering notes
@@ -77,6 +79,7 @@ export function getCurrentOwner() {
  * @param {number} params.ledger - Ledger when created
  * @param {string} [params.owner] - Stellar address that owns this note (defaults to currentOwner)
  * @param {boolean} [params.isReceived=false] - True if note was received via transfer (discovered by scanning)
+ * @param {string} [params.txHash] - Transaction hash from when this note was created
  * @returns {Promise<UserNote>}
  */
 export async function saveNote(params) {
@@ -84,7 +87,7 @@ export async function saveNote(params) {
     if (!owner) {
         console.warn('[NotesStore] Saving note without owner - will not be filtered by account');
     }
-    
+
     const note = {
         id: normalizeHex(params.commitment).toLowerCase(),
         owner: owner || '',
@@ -97,6 +100,10 @@ export async function saveNote(params) {
         spent: false,
         isReceived: params.isReceived || false,
     };
+
+    if (params.txHash) {
+        note.txHash = params.txHash;
+    }
     
     await db.put('user_notes', note);
     const noteType = note.isReceived ? 'received' : 'created';
@@ -108,18 +115,22 @@ export async function saveNote(params) {
  * Marks a note as spent.
  * @param {string} commitment - Note commitment
  * @param {number} ledger - Ledger when spent
+ * @param {string} [txHash] - Transaction hash from when this note was spent
  * @returns {Promise<boolean>} True if note was found and marked
  */
-export async function markNoteSpent(commitment, ledger) {
+export async function markNoteSpent(commitment, ledger, txHash) {
     const id = normalizeHex(commitment).toLowerCase();
     const note = await db.get('user_notes', id);
-    
+
     if (!note) {
         return false;
     }
-    
+
     note.spent = true;
     note.spentAtLedger = ledger;
+    if (txHash) {
+        note.spentTxHash = txHash;
+    }
     await db.put('user_notes', note);
     
     console.log(`[NotesStore] Marked note ${id.slice(0, 10)}... as spent`);

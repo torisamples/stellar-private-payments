@@ -417,7 +417,20 @@ export const Templates = {
         row.querySelector('.copy-btn').addEventListener('click', () => {
             Utils.copyToClipboard(note.id);
         });
-        
+
+        // Explorer button - link to Stellar Expert for the note's transaction
+        const explorerBtn = row.querySelector('.explorer-btn');
+        if (explorerBtn) {
+            // Use txHash for created notes, spentTxHash for spent notes (prefer the most relevant)
+            const txHash = note.spent ? (note.spentTxHash || note.txHash) : note.txHash;
+            if (txHash) {
+                explorerBtn.classList.remove('hidden');
+                explorerBtn.addEventListener('click', () => {
+                    window.open(`https://stellar.expert/explorer/testnet/tx/${txHash}`, '_blank', 'noopener');
+                });
+            }
+        }
+
         return row;
     }
 };

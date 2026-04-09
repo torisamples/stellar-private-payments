@@ -298,7 +298,7 @@ export const Withdraw = {
             
             // Mark input notes as spent in IndexedDB
             for (const inputNote of inputNotes) {
-                await notesStore.markNoteSpent(inputNote.id, submitResult.ledger || 0);
+                await notesStore.markNoteSpent(inputNote.id, submitResult.ledger || 0, submitResult.txHash);
                 // Also update in-memory state
                 const note = App.state.notes.find(n => n.id === inputNote.id);
                 if (note) note.spent = true;
