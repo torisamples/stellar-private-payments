@@ -403,21 +403,21 @@ export const Transfer = {
             
             // Mark input notes as spent in IndexedDB
             for (const inputNote of inputNotes) {
-                await notesStore.markNoteSpent(inputNote.id, submitResult.ledger || 0);
+                await notesStore.markNoteSpent(inputNote.id, submitResult.ledger || 0, submitResult.txHash);
                 // Also update in-memory state
                 const note = App.state.notes.find(n => n.id === inputNote.id);
                 if (note) note.spent = true;
             }
-            
+
             // In a transfer, all outputs in recipientOutputs go to the recipient.
             const recipientOutputCount = recipientOutputs.length;
             const poolNextIndex = states.pool.nextIndex || 0;
-            
+
             for (let i = recipientOutputCount; i < proofResult.outputNotes.length; i++) {
                 const outputNote = proofResult.outputNotes[i];
                 const noteId = fieldToHex(outputNote.commitmentBytes);
                 const leafIndex = poolNextIndex + i;
-                
+
                 // Only save non-dummy change outputs (amount > 0)
                 if (outputNote.amount > 0n) {
                     await notesStore.saveNote({
@@ -428,6 +428,7 @@ export const Transfer = {
                         leafIndex,
                         ledger: submitResult.ledger || 0,
                         isReceived: false,
+                        txHash: submitResult.txHash || undefined,
                     });
                     console.log(`[Transfer] Saved sender's change note ${noteId.slice(0, 10)}... at index ${leafIndex}`);
                 }
