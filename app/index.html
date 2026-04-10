@@ -497,17 +497,27 @@
                     </article>
 
                     <!-- Withdraw Panel -->
-                    <article 
+                    <article
                         role="tabpanel"
                         id="panel-withdraw"
                         aria-labelledby="tab-withdraw"
                         class="tab-panel hidden space-y-6"
                     >
+                        <!-- Educational text -->
+                        <div class="text-sm text-dark-600 space-y-3">
+                            <p>
+                                Your withdrawal generates a zero-knowledge proof that verifies you own the selected notes and are an authorized pool member — without revealing which deposit created them. This is what makes the withdrawal private.
+                            </p>
+                        </div>
+
                         <!-- Input Notes -->
                         <fieldset>
                             <legend class="block text-xs font-medium text-dark-400 uppercase tracking-wide mb-2">
                                 Input Notes <span class="normal-case text-dark-500">(notes to spend)</span>
                             </legend>
+                            <div class="mb-3 p-3 bg-dark-800 border border-dark-700 rounded-lg text-xs text-dark-400 space-y-2">
+                                <p>Select the notes you want to withdraw from the privacy pool by pasting the Note ID. Each note is spent in full — you can't partially spend a note. The total XLM from your selected notes will be sent to the recipient address. In this sandbox you may spend up to two notes within a withdrawal to a single address.</p>
+                            </div>
                             <div id="withdraw-inputs" class="space-y-2">
                                 <!-- Input rows will be created from template -->
                             </div>
@@ -526,7 +536,10 @@
                             <label for="withdraw-recipient" class="block text-xs font-medium text-dark-400 uppercase tracking-wide mb-2">
                                 Recipient Address
                             </label>
-                            <input 
+                            <div class="mb-3 p-3 bg-dark-800 border border-dark-700 rounded-lg text-xs text-dark-400 space-y-2">
+                                <p>Withdrawn XLM is sent to the Stellar address you specify below. This can be your connected wallet or any other valid Stellar account. For maximum privacy, consider withdrawing to a fresh address. The recipient address must not appear on the ASP exclusion list — the zero-knowledge proof includes a non-membership check that will fail if the address has been flagged.</p>
+                            </div>
+                            <input
                                 type="text"
                                 id="withdraw-recipient"
                                 placeholder="G..."
@@ -536,26 +549,12 @@
                             >
                         </div>
 
-                        <!-- ASP Settings -->
-                        <fieldset class="border border-dark-700 rounded-lg p-4">
-                            <legend class="text-xs font-medium text-dark-400 uppercase tracking-wide px-2">
-                                ASP Membership Settings
-                            </legend>
-                            <div>
-                                <label for="withdraw-membership-blinding" class="block text-xs text-dark-400 mb-1">
-                                    Membership Blinding <span class="text-dark-500">(used when your key was registered)</span>
-                                </label>
-                                <input 
-                                    type="text"
-                                    id="withdraw-membership-blinding"
-                                    value="0"
-                                    placeholder="0"
-                                    class="w-full px-3 py-2 bg-dark-800 border border-dark-700 rounded-lg font-mono text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 placeholder:text-dark-600"
-                                    autocomplete="off"
-                                    spellcheck="false"
-                                >
-                            </div>
-                        </fieldset>
+                        <!-- ASP Membership Info -->
+                        <div class="p-3 bg-dark-800/50 border border-dark-700 rounded-lg text-xs text-dark-400 leading-relaxed">
+                            <span class="font-semibold text-dark-300">Membership blinding:</span> Fixed to 0 for this sandbox. The blinding factor is a random value included in your membership commitment when you join the pool — it prevents the ASP operator from linking your wallet address to your pool membership. In production, your wallet would generate a unique blinding during registration, and you'd need the same value here to reconstruct your membership proof for withdrawal.
+                        </div>
+                        <!-- Hidden input preserves value for withdraw.js -->
+                        <input type="hidden" id="withdraw-membership-blinding" value="0">
 
                         <!-- Submit Button -->
                         <button 
@@ -1273,7 +1272,7 @@
                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 </button>
             </div>
-            <span class="value-display font-mono text-xs px-2 py-1 bg-dark-700 rounded text-dark-500 min-w-[70px] text-right">0 XLM</span>
+            <span class="value-display font-mono text-xs px-2 py-1 bg-dark-600 rounded text-dark-300 min-w-[70px] text-right">0 XLM</span>
         </div>
     </template>
 
